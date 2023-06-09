@@ -8,6 +8,18 @@ const {
   ButtonBuilder,
 } = require("discord.js");
 
+const generateLatex = (code) =>{
+  const encodedCode = encodeURIComponent(code);
+  console.log(encodedCode);
+  const latexImageURL = `https://latex.codecogs.com/png.latex?\\bg_white\\dpi{200}${encodedCode}`;
+
+  const embed = new EmbedBuilder()
+    .setTitle("Rendered LaTeX")
+    .setImage(latexImageURL)
+    .setColor(13631488);
+  return embed;
+}
+
 const client = new Client({
   intents: [
     IntentsBitField.Flags.Guilds,
@@ -28,6 +40,13 @@ client.on("messageCreate", (msg) => {
       break;
     case "hello":
       msg.reply(`error: 'cout<<"world"<<endl;' was not declared in this scope`);
+    case "help":
+      msg.reply("I'm sorry, I can't help you.");
+      break;
+    case "java bad":
+    case "java is bad":
+    case "java sucks":
+      msg.reply("I agree.");
       break;
   }
 });
@@ -51,8 +70,7 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.isCommand()) {
     if (interaction.commandName === "hey") {
       interaction.reply("hello!");
-    }
-    if (interaction.commandName === "embed") {
+    } else if (interaction.commandName === "embed") {
       const title = interaction.options.getString("title");
       const description = interaction.options.getString("description");
       const embed = new EmbedBuilder()
@@ -60,19 +78,18 @@ client.on("interactionCreate", async (interaction) => {
         .setDescription(description)
         .setColor(13631488);
       interaction.reply({embeds: [embed]});
-    }
-    if(interaction.commandName === "sentreactionroles"){
-      if(!interaction.member.permissions.has(8)) return;
+    } else if (interaction.commandName === "render-latex") {
+      const code = interaction.options.getString("code");
+      interaction.reply({embeds: [generateLatex(code)]});
+    } else if (interaction.commandName === "sentreactionroles") {
+      if (!interaction.member.permissions.has(8)) return;
       try {
-        interaction.reply({
-          content: "Sent the reaction roles message!",
-          ephemeral: true,
-        });
+        interaction.reply("The reaction ");
         const channel = await client.channels.cache.get("1116832903180075018");
         if (!channel) return;
-    
+
         const row = new ActionRowBuilder();
-    
+
         roles.forEach((role) => {
           row.components.push(
             new ButtonBuilder()
@@ -83,10 +100,10 @@ client.on("interactionCreate", async (interaction) => {
         });
 
         const message = new EmbedBuilder()
-        .setTitle("Choose the programming langauge you are familiar with.")
-        .setDescription("ACSL supports Java, Python 3, and C++.")
-        .setColor(13631488);
-    
+          .setTitle("Choose the programming langauge you are familiar with.")
+          .setDescription("ACSL supports Java, Python 3, and C++.")
+          .setColor(13631488);
+
         await channel.send({
           content: "",
           embeds: [message],
