@@ -40,6 +40,7 @@ client.on("messageCreate", (msg) => {
       break;
     case "hello":
       msg.reply(`error: 'cout<<"world"<<endl;' was not declared in this scope`);
+      break;
     case "help":
       msg.reply("I'm sorry, I can't help you.");
       break;
