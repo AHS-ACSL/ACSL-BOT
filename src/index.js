@@ -46,6 +46,7 @@ client.on("messageCreate", (msg) => {
     case "java bad":
     case "java is bad":
     case "java sucks":
+    case "java suck":
       msg.reply("I agree.");
       break;
   }
@@ -85,7 +86,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!interaction.member.permissions.has(8)) return;
       try {
         interaction.reply("The reaction ");
-        const channel = await client.channels.cache.get("1116832903180075018");
+        const channel = await client.channels.cache.get(channel.id);
         if (!channel) return;
 
         const row = new ActionRowBuilder();
