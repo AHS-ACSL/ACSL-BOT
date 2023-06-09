@@ -86,8 +86,8 @@ client.on("interactionCreate", async (interaction) => {
     } else if (interaction.commandName === "sentreactionroles") {
       if (!interaction.member.permissions.has(8)) return;
       try {
-        interaction.reply("The reaction ");
-        const channel = await client.channels.cache.get(channel.id);
+        interaction.reply("The message has been sent.");
+        const channel = await client.channels.cache.get(interaction.channelId);
         if (!channel) return;
 
         const row = new ActionRowBuilder();
