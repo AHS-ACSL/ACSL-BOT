@@ -6,7 +6,9 @@ const {
   ActionRowBuilder,
   ButtonStyle,
   ButtonBuilder,
+  ActivityType,
 } = require("discord.js");
+const eventHandler = require("./handlers/eventHandler");
 
 const generateLatex = (code) =>{
   const encodedCode = encodeURIComponent(code);
@@ -29,29 +31,29 @@ const client = new Client({
   ],
 });
 
-client.on("messageCreate", (msg) => {
-  if (msg.author.bot) {
-    return;
-  }
+// client.on("messageCreate", (msg) => {
+//   if (msg.author.bot) {
+//     return;
+//   }
 
-  switch (msg.content) {
-    case "ping":
-      msg.reply("pong");
-      break;
-    case "hello":
-      msg.reply(`error: 'cout<<"world"<<endl;' was not declared in this scope`);
-      break;
-    case "help":
-      msg.reply("I'm sorry, I can't help you.");
-      break;
-    case "java bad":
-    case "java is bad":
-    case "java sucks":
-    case "java suck":
-      msg.reply("I agree.");
-      break;
-  }
-});
+//   switch (msg.content) {
+//     case "ping":
+//       msg.reply("pong");
+//       break;
+//     case "hello":
+//       msg.reply(`error: 'cout<<"world"<<endl;' was not declared in this scope`);
+//       break;
+//     case "help":
+//       msg.reply("I'm sorry, I can't help you.");
+//       break;
+//     case "java bad":
+//     case "java is bad":
+//     case "java sucks":
+//     case "java suck":
+//       msg.reply("I agree.");
+//       break;
+//   }
+// });
 
 const roles = [
   {
@@ -68,82 +70,89 @@ const roles = [
   },
 ];
 
-client.on("interactionCreate", async (interaction) => {
-  if (interaction.isCommand()) {
-    if (interaction.commandName === "hey") {
-      interaction.reply("hello!");
-    } else if (interaction.commandName === "embed") {
-      const title = interaction.options.getString("title");
-      const description = interaction.options.getString("description");
-      const embed = new EmbedBuilder()
-        .setTitle(title)
-        .setDescription(description)
-        .setColor(13631488);
-      interaction.reply({embeds: [embed]});
-    } else if (interaction.commandName === "render-latex") {
-      const code = interaction.options.getString("code");
-      interaction.reply({embeds: [generateLatex(code)]});
-    } else if (interaction.commandName === "sentreactionroles") {
-      if (!interaction.member.permissions.has(8)) return;
-      try {
-        interaction.reply("The message has been sent.");
-        const channel = await client.channels.cache.get(interaction.channelId);
-        if (!channel) return;
+// client.on("interactionCreate", async (interaction) => {
+//   if (interaction.isCommand()) {
+//     if (interaction.commandName === "hey") {
+//       interaction.reply("hello!");
+//     } else if (interaction.commandName === "embed") {
+//       const title = interaction.options.getString("title");
+//       const description = interaction.options.getString("description");
+//       const embed = new EmbedBuilder()
+//         .setTitle(title)
+//         .setDescription(description)
+//         .setColor(13631488);
+//       interaction.reply({embeds: [embed]});
+//     } else if (interaction.commandName === "render-latex") {
+//       const code = interaction.options.getString("code");
+//       interaction.reply({embeds: [generateLatex(code)]});
+//     } else if (interaction.commandName === "sentreactionroles") {
+//       if (!interaction.member.permissions.has(8)) return;
+//       try {
+//         interaction.reply("The message has been sent.");
+//         const channel = await client.channels.cache.get(interaction.channelId);
+//         if (!channel) return;
 
-        const row = new ActionRowBuilder();
+//         const row = new ActionRowBuilder();
 
-        roles.forEach((role) => {
-          row.components.push(
-            new ButtonBuilder()
-              .setCustomId(role.id)
-              .setLabel(role.label)
-              .setStyle(ButtonStyle.Primary)
-          );
-        });
+//         roles.forEach((role) => {
+//           row.components.push(
+//             new ButtonBuilder()
+//               .setCustomId(role.id)
+//               .setLabel(role.label)
+//               .setStyle(ButtonStyle.Primary)
+//           );
+//         });
 
-        const message = new EmbedBuilder()
-          .setTitle("Choose the programming langauge you are familiar with.")
-          .setDescription("ACSL supports Java, Python 3, and C++. You are not required to have any previous experience with these languages.")
-          .setColor(13631488);
+//         const message = new EmbedBuilder()
+//           .setTitle("Choose the programming langauge you are familiar with.")
+//           .setDescription("ACSL supports Java, Python 3, and C++. You are not required to have any previous experience with these languages.")
+//           .setColor(13631488);
 
-        await channel.send({
-          content: "",
-          embeds: [message],
-          components: [row],
-        });
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  } else if (interaction.isButton()) {
-    try {
-      await interaction.deferReply({ephemeral: true});
-      const role = interaction.guild.roles.cache.get(interaction.customId);
-      if (!role) {
-        await interaction.editReply({
-          content: "I couldn't find that role",
-        });
-        return;
-      }
+//         await channel.send({
+//           content: "",
+//           embeds: [message],
+//           components: [row],
+//         });
+//       } catch (error) {
+//         console.log(error);
+//       }
+//     }
+//   } else if (interaction.isButton()) {
+//     try {
+//       await interaction.deferReply({ephemeral: true});
+//       const role = interaction.guild.roles.cache.get(interaction.customId);
+//       if (!role) {
+//         await interaction.editReply({
+//           content: "I couldn't find that role",
+//         });
+//         return;
+//       }
 
-      const hasRole = interaction.member.roles.cache.has(role.id);
+//       const hasRole = interaction.member.roles.cache.has(role.id);
 
-      if (hasRole) {
-        await interaction.member.roles.remove(role);
-        await interaction.editReply(`The role ${role} has been removed.`);
-        return;
-      }
+//       if (hasRole) {
+//         await interaction.member.roles.remove(role);
+//         await interaction.editReply(`The role ${role} has been removed.`);
+//         return;
+//       }
 
-      await interaction.member.roles.add(role);
-      await interaction.editReply(`The role ${role} has been added.`);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-});
+//       await interaction.member.roles.add(role);
+//       await interaction.editReply(`The role ${role} has been added.`);
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   }
+// });
 
-client.on("ready", async (c) => {
-  console.log(`Logged in as ${client.user.tag}!`);
-});
+// client.on("ready", async (c) => {
+//   console.log(`Logged in as ${client.user.tag}!`);
+
+//   client.user.setActivity({
+//     name: "ACSL",
+//     type: ActivityType.Watching,
+//   });
+// });
+
+eventHandler(client);
 
 client.login(process.env.TOKEN);
