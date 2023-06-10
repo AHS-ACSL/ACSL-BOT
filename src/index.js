@@ -103,7 +103,7 @@ client.on("interactionCreate", async (interaction) => {
 
         const message = new EmbedBuilder()
           .setTitle("Choose the programming langauge you are familiar with.")
-          .setDescription("ACSL supports Java, Python 3, and C++.")
+          .setDescription("ACSL supports Java, Python 3, and C++. You are not required to have any previous experience with these languages.")
           .setColor(13631488);
 
         await channel.send({
