@@ -27,7 +27,7 @@ sequelize.Level = Level(sequelize);
     await sequelize.authenticate();
     console.log('Connected to DB.');
 
-    await sequelize.sync({ force: true });
+    await sequelize.sync();
 
     eventHandler(client);
     await client.login(process.env.TOKEN);
