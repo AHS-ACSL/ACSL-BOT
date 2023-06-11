@@ -22,7 +22,6 @@ module.exports = async (client, message) => {
 
   try {
     let level = await Level.findOne({ where: { userId: message.author.id, guildId: message.guild.id } });
-
     if (level) {
       level.xp += xpToGive;
 
