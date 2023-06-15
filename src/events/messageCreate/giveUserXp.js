@@ -1,6 +1,7 @@
 const { Client, Message } = require('discord.js');
 const calculateLevelXp = require('../../utils/calculateLevelXp');
 const sequelize = require('../../index.js');
+const config = require('../../../config.json');
 const Level = sequelize.Level;
 const cooldowns = new Set();
 
@@ -28,8 +29,10 @@ module.exports = async (client, message) => {
       if (level.xp > calculateLevelXp(level.level)) {
         level.xp = 0;
         level.level += 1;
+        //message.member for ping
+        let redirectChannel = client.channels.cache.get(config.levelingChannel);
 
-        message.channel.send(`${message.member} you have leveled up to **level ${level.level}**.`);
+        redirectChannel.send(`${message.member.displayName} you have leveled up to **level ${level.level}**.`);
       }
 
       await level.save().catch((e) => {
