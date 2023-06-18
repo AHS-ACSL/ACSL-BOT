@@ -1,10 +1,7 @@
 const {ApplicationCommandOptionType, EmbedBuilder} = require("discord.js");
-const {Configuration, OpenAIApi} = require("openai");
+const {OpenAIApi, Configuration} = require("openai");
 
 const config = require("../../../config.json");
-
-const cooldowns = {};
-const cooldownDuration = 5 * 60 * 1000;
 
 module.exports = {
   name: "ask",
@@ -18,60 +15,101 @@ module.exports = {
       type: ApplicationCommandOptionType.String,
       required: true,
     },
-    {
-        name: "useadvancemodel",
-        description: "advance model will have less token",
-        type: ApplicationCommandOptionType.Boolean,
-        required: true,
-    }
   ],
   //deleted : bool,
   callback: async (client, interaction) => {
+    interaction.channel.sendTyping();
     const prompt = interaction.options.getString("prompt");
-    const useAdvanceModel = interaction.options.getBoolean("useadvancemodel");
-
     const userId = interaction.user.id;
 
-    const hasAdminRole = interaction.member.roles.cache.some(role => config.adminsRole.includes(role.id));
-    if (!hasAdminRole && (cooldowns[userId] && cooldowns[userId] > Date.now())) {
-        await interaction.reply({content: "You're doing that too frequently. Please wait a few minutes and try again.", ephemeral: true});
-        return;
-    }
+    // const hasAdminRole = interaction.member.roles.cache.some(role => config.adminsRole.includes(role.id));
+    // if (!hasAdminRole && (cooldowns[userId] && cooldowns[userId] > Date.now())) {
+    //     await interaction.reply({content: "You're doing that too frequently. Please wait a few minutes and try again.", ephemeral: true});
+    //     return;
+    // }
 
-    //check the length of the prompt
-    if (prompt.length > 256 || (!useAdvanceModel && prompt.length > 1024)) {
-        await interaction.reply({content: "Sorry your prompt is too long, we cap at 256 character for advance model and 1024 character for the other model", ephemeral: true});
-        return;
-    }
+    let conversationlog = [
+      {
+        role: "system",
+        content: `As a Discord Bot for the Arcadia High School ACSL Club, your aim is to provide concise and appropriate responses, while also incorporating a touch of sarcasm for non-serious questions, such as "What is 1 + 1?"`,
+      },
+    ];
 
-    await interaction.deferReply();
-    const configuration = new Configuration({
-        apiKey: process.env.OPENAI_API_KEY,
-    });
-    const openai = new OpenAIApi(configuration);
-    const response = await openai.createCompletion({
-        model: useAdvanceModel ? "text-davinci-003" : "text-curie-001",
-        prompt: prompt,
-        temperature: 0.5,
-        max_tokens: useAdvanceModel ? 64 : 256,
-        top_p: 1.0,
-        frequency_penalty: 0.0,
-        presence_penalty: 0.0,
+    let prevMsg = await interaction.channel.messages.fetch({limit: 5});
+    //check if prevMsg exists
+    if (prevMsg) {
+      //reverse prevMsg
+      let lasttimestamp = 0;
+      prevMsg = prevMsg.reverse();
+      prevMsg.forEach((msg) => {
+        try {
+          //the author of the message is the bot
+          if (msg.author.id === client.user.id) {
+            //check if message is embed
+            if (msg.embeds) {
+              msg.embeds.forEach((embed) => {
+                if(embed.footer.text === userId) {
+                  //check if title or description is empty 
+                  if (embed.title || embed.description || embed.timestamp) {
+                    lasttimestamp = msg.createdTimestamp;
+                    conversationlog.push({
+                      role: "user",
+                      content: embed.title
+                    });
+                    conversationlog.push({
+                      role: "assistant",
+                      content: embed.description
+                    });
+                  }
+                }
+              });
+            }
+          }
+        } catch (error) {
+          //ignored
+          //console.log(error);
+        }
       });
-
-    if (!response) {
-      await interaction.editReply({content: "Sorry, generation failed", ephemeral: true});
-      return;
+      //check if this time - last time is less than 10 seconds
+      if (Date.now() - lasttimestamp < 10000) {
+        await interaction.reply({
+          content:
+            "You're doing that too frequently. Please wait a few seconds and try again.",
+          ephemeral: true,
+        });
+        return;
+      }
     }
 
-    //console.log(response.data);
+    interaction.deferReply();
+    const configuration = new Configuration({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
-    cooldowns[userId] = Date.now() + cooldownDuration;
+    const openai = new OpenAIApi(configuration);
+
+    conversationlog.push({
+      role: "user",
+      content: prompt,
+    });
+
+    //console.log(conversationlog);
+
+    const response = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: conversationlog,
+    });
+
+    //console.log(response.data.choices[0].message);
+
+    //console.log(response.data.choices[0].message.content);
 
     const embed = new EmbedBuilder()
       .setColor("#0099ff")
-      .setDescription(response.data.choices[0].text.trim())
-      .setTitle("Request Success: " + prompt);
+      .setDescription(response.data.choices[0].message.content)
+      .setTitle(prompt)
+      .setFooter({"text": userId})
+      .setTimestamp();
     await interaction.editReply({embeds: [embed]});
   },
 };
