@@ -16,12 +16,12 @@ const options = {
 
 module.exports = async (client, message) => {
     if (!message.guild || message.author.bot) return;
-    if (message.content.startsWith('!runPy')) {
+    if (message.content.toLowerCase().startsWith('!runpy')) {
         message.reply('Submitting code...');
         const codeBlock = message.content.split('```py');
         if (codeBlock.length < 2) {
             return message.reply('Invalid format. Code must be surrounded by triple backticks and py.' +
-                '\nExample:\n!runPy\n```py\nprint("Your code here")\n```'
+                '\nExample:\n!runpy\n```py\nprint("Your code here")\n```'
             );
         }
         const code = codeBlock[1].split('```')[0];  // assuming code is surrounded by ```py and ```
@@ -42,11 +42,11 @@ module.exports = async (client, message) => {
                             'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
                         }
                     });
-                    const { stdout, stderr, message: resultMessage, time } = result.data;
+                    const { stdout, stderr, message: resultMessage, time, compile_output } = result.data;
                     if (stdout) {
                         message.reply(`\nOutput:\n\`\`\`${stdout}\`\`\``);
-                    } else if (stderr || resultMessage) {
-                        message.reply(`\nError:\n\`\`\`${stderr || resultMessage}\`\`\``);
+                    } else if (stderr || resultMessage || compile_output) {
+                        message.reply(`\nError:\n\`\`\`${stderr || resultMessage || compile_output}\`\`\``);
                     }
                     if (result.data.time_limit_exceeded) {
                         message.reply(`Execution exceeded the time limit.`);

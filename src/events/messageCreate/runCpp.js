@@ -16,12 +16,12 @@ const options = {
 
 module.exports = async (client, message) => {
     if (!message.guild || message.author.bot) return;
-    if (message.content.startsWith('!runCpp')) {
+    if (message.content.toLowerCase().startsWith('!runcpp')) {
         message.reply('Submitting code...');
         const codeBlock = message.content.split('```cpp');
         if (codeBlock.length < 2) {
             return message.reply('Invalid format. Code must be surrounded by triple backticks and cpp.' +
-                '\nExample:\n!runCpp\n```cpp\n#include<iostream>\n\nint main() {\nstd::cout << "Your code here";\nreturn 0;\n}\n```'
+                '\nExample:\n!runcpp\n```cpp\n#include<iostream>\n\nint main() {\nstd::cout << "Your code here";\nreturn 0;\n}\n```'
             );
         }
         const code = codeBlock[1].split('```')[0];  // assuming code is surrounded by ```cpp and ```
@@ -42,11 +42,11 @@ module.exports = async (client, message) => {
                             'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
                         }
                     });
-                    const { stdout, stderr, message: resultMessage, time } = result.data;
+                    const { stdout, stderr, message: resultMessage, time, compile_output } = result.data;
                     if (stdout) {
                         message.reply(`\nOutput:\n\`\`\`${stdout}\`\`\``);
-                    } else if (stderr || resultMessage) {
-                        message.reply(`\nError:\n\`\`\`${stderr || resultMessage}\`\`\``);
+                    } else if (stderr || resultMessage || compile_output) {
+                        message.reply(`\nError:\n\`\`\`${stderr || resultMessage || compile_output}\`\`\``);
                     }
                     if (result.data.time_limit_exceeded) {
                         message.reply(`Execution exceeded the time limit.`);

@@ -3,7 +3,7 @@ const util = require('util');
 
 module.exports = async (client, message) => {
     if (!message.guild || message.author.bot) return;
-    if (message.content.startsWith('!runJS')) {
+    if (message.content.toLowerCase().startsWith('!runjs')) {
         const codeBlock = message.content.split('```js');
         if (codeBlock.length < 2) {
             return message.reply(
@@ -26,7 +26,8 @@ module.exports = async (client, message) => {
         // Run code in the VM
         try {
             new VM({
-                timeout: 3000,  // Set timeout to 3 seconds
+                eval: false,
+                timeout: 5000,  // Set timeout to 5 seconds
                 sandbox: { console: { log } }
             }).run(code);
         } catch (error) {
