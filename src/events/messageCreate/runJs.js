@@ -8,8 +8,7 @@ module.exports = async (client, message) => {
         if (codeBlock.length < 2) {
             return message.reply(
                 'Invalid format. Code must be surrounded by triple backticks and js.' +
-                '\n!runJS\n``(3 backticks)js\nconsole.log("Your code here");\n(3 backticks)'+
-                '\nExample:\n!runJS\n```js\nconsole.log("Your code here");\n```'
+                '\nExample:\n !runjs \n \\```js\nconsole.log("Hello world!");\n\\```'
             );
         }
         const code = codeBlock[1].split('```')[0];  // assuming code is surrounded by ```js and ```

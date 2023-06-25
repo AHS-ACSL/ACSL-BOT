@@ -21,7 +21,7 @@ module.exports = async (client, message) => {
         const codeBlock = message.content.split('```cpp');
         if (codeBlock.length < 2) {
             return message.reply('Invalid format. Code must be surrounded by triple backticks and cpp.' +
-                '\nExample:\n!runcpp\n```cpp\n#include<iostream>\n\nint main() {\nstd::cout << "Your code here";\nreturn 0;\n}\n```'
+                '\nExample:\n!runcpp\n \\```cpp\n#include<iostream>\n\nint main() {\nstd::cout << "Your code here";\nreturn 0;\n}\n\\```'
             );
         }
         const code = codeBlock[1].split('```')[0];  // assuming code is surrounded by ```cpp and ```

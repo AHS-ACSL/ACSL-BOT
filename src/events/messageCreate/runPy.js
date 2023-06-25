@@ -21,7 +21,7 @@ module.exports = async (client, message) => {
         const codeBlock = message.content.split('```py');
         if (codeBlock.length < 2) {
             return message.reply('Invalid format. Code must be surrounded by triple backticks and py.' +
-                '\nExample:\n!runpy\n```py\nprint("Your code here")\n```'
+            '\nExample:\n !runpy \n\\```py\nprint("imagine using python")\n\\```'
             );
         }
         const code = codeBlock[1].split('```')[0];  // assuming code is surrounded by ```py and ```

@@ -21,7 +21,7 @@ module.exports = async (client, message) => {
         const codeBlock = message.content.split('```java');
         if (codeBlock.length < 2) {
             return message.reply('Invalid format. Code must be surrounded by triple backticks and java.' +
-                '\nExample:\n!runjava\n```java\npublic class Main { public static void main(String[] args) { System.out.println("Your code here"); }}\n```'
+            '\nExample:\n !runjava \n \\```java\n //your code, class must be Main\n\\```'
             );
         }
         const code = codeBlock[1].split('```')[0];  // assuming code is surrounded by ```Java and ```
