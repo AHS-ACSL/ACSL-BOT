@@ -4,7 +4,10 @@ const util = require('util');
 
 module.exports = async (client, message) => {
     if (message.author.bot) return;
-    if (message.content.toLowerCase().startsWith('!submit') && message.channel.type === 'dm') {
+    // console.log(message.content);
+    // console.log(message.channel.type);
+    if (message.content.toLowerCase().startsWith('!submit') && message.channel.type === 1) { //1 is DM
+        console.log('submitting');
         const codeBlock = message.content.split('```js');
         if (codeBlock.length < 2) {
             return message.reply(

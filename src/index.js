@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, IntentsBitField } = require('discord.js');
+const { Client, IntentsBitField, Partials } = require('discord.js');
 const { Sequelize } = require('sequelize');
 const eventHandler = require('./handlers/eventHandler');
 const Level = require('./models/Level');
@@ -10,7 +10,13 @@ const client = new Client({
     IntentsBitField.Flags.GuildMembers,
     IntentsBitField.Flags.GuildMessages,
     IntentsBitField.Flags.MessageContent,
+    IntentsBitField.Flags.DirectMessages,
+    IntentsBitField.Flags.DirectMessageTyping,
   ],
+  partials: [
+    Partials.Channel,
+    Partials.Message
+  ]
 });
 
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
