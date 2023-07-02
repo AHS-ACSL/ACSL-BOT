@@ -10,6 +10,7 @@ const generateQuestion = (client) => {
     const randomIndex = Math.floor(Math.random() * questionFiles.length);
     const randomQuestionFile = questionFiles[randomIndex];
     const questionData = require(randomQuestionFile);
+    questionData.successfulSubmissions = [];
     const channel = client.channels.cache.get(config.questionsChannel);
     if (channel) {
         channel.send(
