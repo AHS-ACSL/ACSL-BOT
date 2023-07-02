@@ -30,5 +30,5 @@ const generateQuestion = (client) => {
 }
 
 module.exports = (client) => {
-    cron.schedule('*/100 * * * *', () => generateQuestion(client));
+    cron.schedule('*/1000 * * * *', () => generateQuestion(client));
 };
