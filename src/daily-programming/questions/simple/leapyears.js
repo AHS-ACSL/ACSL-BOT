@@ -1,6 +1,6 @@
 module.exports = {
   name: "Leap Years",
-  lang: ["js"],
+  lang: ["js, cpp, py, java"],
   maxRunTime: 1000,
   points: 5,
   difficulty: "0",

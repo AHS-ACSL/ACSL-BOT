@@ -9,7 +9,7 @@ const config = require('../../../config.json');
 module.exports = async (client, message) => {
     if (message.author.bot) return;
     if (message.content.toLowerCase().startsWith('!submit') && message.channel.type === 1) { 
-        console.log('submitting');
+        //console.log('submitting');
         const codeBlock = message.content.split('```js');
         if (codeBlock.length < 2) {
             return message.reply(
