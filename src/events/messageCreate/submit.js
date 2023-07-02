@@ -1,92 +1,85 @@
-const { VM } = require('vm2');
-const path = require('path');
-const util = require('util');
-const fs = require('fs');
-const sequelize = require('../../index.js');
+const {VM} = require("vm2");
+const axios = require("axios");
+const path = require("path");
+const fs = require("fs");
+const util = require("util");
+const JSZip = require("jszip");
+const sequelize = require("../../index.js");
 const Level = sequelize.Level;
-const config = require('../../../config.json');
+const config = require("../../../config.json");
+
+const languageIdMap = {
+  js: 63,
+  java: 62,
+  cpp: 54,
+  py: 71,
+};
 
 module.exports = async (client, message) => {
-    if (message.author.bot) return;
-    if (message.content.toLowerCase().startsWith('!submit') && message.channel.type === 1) { 
-        //console.log('submitting');
-        const codeBlock = message.content.split('```js');
-        if (codeBlock.length < 2) {
-            return message.reply(
-                'Invalid format. Code must be surrounded by triple backticks and js.' +
-                '\nExample:\n !submit \n \\```js\nconsole.log("Hello world!");\n\\```'
-            );
-        }
-        
-        let questionData;
-        try {
-            questionData = JSON.parse(fs.readFileSync(path.join(__dirname, '..',"..", '..', 'currentQuestion.json'), 'utf-8'));
-        } catch (error) {
-            console.error(error);
-            return message.reply("No active question found to submit against!");
-        }
+  if (message.author.bot) return;
+  if (
+    !(
+      message.content.toLowerCase().startsWith("!submit") &&
+      message.channel.type === 1
+    )
+  )
+    return;
 
-        // Check if the user has already successfully submitted for this question
-        if (questionData.successfulSubmissions.includes(message.author.id)) {
-            return message.reply("You have already successfully submitted a solution to this question.");
-        }
-        
-        const code = codeBlock[1].split('```')[0];
-        const wrappedCode = `
-            function ${questionData.functionName}(${questionData.params.join(', ')}) {
-                ${code}
-            }
-            ${questionData.testCases.map((tc, index) => `console.log(${questionData.functionName}(${tc.input}))`).join('\n')}
-        `;
-        
-        let output = '';
-        const log = (...args) => {
-            output += util.format(...args) + '\n';
-            return output;
-        };
+    let questionData = JSON.parse(fs.readFileSync(path.join(__dirname, '..',"..", '..', 'currentQuestion.json'), 'utf-8'));
+    if(!questionData) return message.reply("No question is currently active. Please wait for a question to be generated.");
 
-        const vm = new VM({
-            timeout: questionData.maxRunTime,
-            sandbox: { console: { log } }
-        });
+  const codeBlock = message.content.match(/```(\w+)\n([\s\S]*?)```/);
+  if (!codeBlock) {
+    return message.reply(
+      "Invalid format. Code must be surrounded by triple backticks and the language name."
+    );
+  }
 
-        try {
-            vm.run(wrappedCode);
+  const language = codeBlock[1];
+  const code = codeBlock[2];
 
-            const results = output.split('\n').filter(x => x);
-            for (let i = 0; i < questionData.testCases.length; i++) {
-                if (results[i] !== String(questionData.testCases[i].expected)) {
-                    return message.reply(`Test case failed: input(${questionData.testCases[i].input}) returned ${results[i]}, expected ${questionData.testCases[i].expected}`);
-                }
-            }
-            
-            // Give user 5 levels
-            let level = await Level.findOne({ where: { userId: message.author.id, guildId: config.testServer } });
-            //console.log(level);
-            if (level) {
-                level.level += 5;
-                // Update database
-                await level.save().catch((e) => {
-                    console.log(`Error saving updated level ${e}`);
-                    return;
-                });
-            } else {
-                // If the user doesn't exist, create a new one with level 5
-                level = await Level.create({
-                    userId: message.author.id,
-                    guildId: message.guild.id,
-                    xp: 0,
-                    level: 5
-                });
-            }
-            message.reply('All test cases passed! Good job! You are now level ' + level.level + '!');
+  if (Object.keys(languageIdMap).includes(language)) {
+    return message.reply(
+      `Unsupported language. Supported languages are ${Object.keys(
+        languageIdMap
+      ).join(", ")}`
+    );
+  }
 
-            questionData.successfulSubmissions.push(message.author.id);
-            fs.writeFileSync(path.join(__dirname, '..',"..", '..', 'currentQuestion.json'), JSON.stringify(questionData));
+  const header = {
+    headers: {
+      "X-Auth-Token": process.env.JudgeAPI,
+    },
+  };
+
+  const zip = new JSZip();
+
+  //mutiple files
+  const submissionData = {
+    language_id: 89, //mutiple files
+    additional_files: "",
+    cpu_time_limit: 10,
+    cpu_extra_time: 2,
+  };
+
+  switch (language) {
+    case "js":
+      break; //todo: etiher use vm or api
+    case "java":
+        zip.file("compile", `/usr/local/openjdk13/bin/javac Main.java ${questionData.lang[2].filename}.java`)
+        zip.file("run", `java -cp . ${questionData.lang[2].filename}`)
+        zip.file(`${questionData.lang[2].filename}.java`, code)
+        zip.file("Main.java", questionData.lang[2].main)
+        //to base64
+        const content = await zip.generateAsync({type:"base64"})
+        submissionData.additional_files = content
+        submissionData = questionData.lang[2].runtime
 
 
-        } catch (error) {
-            message.reply('Error while running code: ' + error.message);
-        }
-    }
+      break; //todo: use api
+    case "cpp":
+      break; //todo: use api
+    case "py":
+      break; //todo: use api
+  }
 };
