@@ -26,9 +26,9 @@ const generateQuestion = (client) => {
     }
 
     // Store the current question data for submission checking
-    fs.writeFileSync(path.join(__dirname, '..', '..', 'currentQuestion.json'), JSON.stringify(questionData));
+    fs.writeFileSync(path.join(__dirname, '..',"..", '..', 'currentQuestion.json'), JSON.stringify(questionData));
 }
 
 module.exports = (client) => {
-    cron.schedule('*/1000 * * * *', () => generateQuestion(client));
+    //cron.schedule('*/1 * * * *', () => generateQuestion(client));
 };

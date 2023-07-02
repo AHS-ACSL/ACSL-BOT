@@ -20,7 +20,7 @@ module.exports = async (client, message) => {
         
         let questionData;
         try {
-            questionData = require(path.join(__dirname, '..', '..', 'currentQuestion.json'));
+            questionData = JSON.parse(fs.readFileSync(path.join(__dirname, '..',"..", '..', 'currentQuestion.json'), 'utf-8'));
         } catch (error) {
             console.error(error);
             return message.reply("No active question found to submit against!");
@@ -59,17 +59,12 @@ module.exports = async (client, message) => {
                     return message.reply(`Test case failed: input(${questionData.testCases[i].input}) returned ${results[i]}, expected ${questionData.testCases[i].expected}`);
                 }
             }
-            // All test cases passed
-            fs.writeFileSync(path.join(__dirname, '..', '..', 'currentQuestion.json'), JSON.stringify(questionData));
-
-            message.reply('All test cases passed! Good job!');
             
             // Give user 5 levels
             let level = await Level.findOne({ where: { userId: message.author.id, guildId: config.testServer } });
-            console.log(level);
+            //console.log(level);
             if (level) {
                 level.level += 5;
-
                 // Update database
                 await level.save().catch((e) => {
                     console.log(`Error saving updated level ${e}`);
@@ -84,8 +79,11 @@ module.exports = async (client, message) => {
                     level: 5
                 });
             }
+            message.reply('All test cases passed! Good job! You are now level ' + level.level + '!');
 
             questionData.successfulSubmissions.push(message.author.id);
+            fs.writeFileSync(path.join(__dirname, '..',"..", '..', 'currentQuestion.json'), JSON.stringify(questionData));
+
 
         } catch (error) {
             message.reply('Error while running code: ' + error.message);
