@@ -5,7 +5,7 @@ module.exports = {
   points: 5,
   difficulty: "my dog can do it",
   instruction:
-    "Submit to ACSL BOT by dm" +
+    "Submit to ACSL BOT by dm\n " +
     "You should simply determine whether a given year is a leap year or not. In case you don't know the rules, here they are: \n" +
     "1. The year is evenly divisible by 4;\n" +
     "2. If the year can be evenly divided by 100, it is NOT a leap year, unless;\n" +
@@ -31,4 +31,5 @@ module.exports = {
   ],
   functionName: "isLeapYear",
   params: ["year"],
+  aigrading: false,
 };

@@ -35,6 +35,10 @@ module.exports = async (client, message) => {
     return message.reply(
       "No question is currently active. Please wait for a question to be generated."
     );
+  //check if user has already submitted
+  if (questionData.successfulSubmissions.includes(message.author.id)) {
+    return message.reply("You have already submitted a correct solution.");
+  }
 
   const codeBlock = message.content.match(/```(\w+)\n([\s\S]*?)```/);
   if (!codeBlock) {
@@ -82,16 +86,16 @@ module.exports = async (client, message) => {
   };
 
   try {
+    message.reply("Awaiting for the grading server... this may take a while.");
     const response = await axios.request(options);
 
-    console.log(response.data);
+    //console.log(response.data);
     try {
       const response = await axios.request(options);
       const {token} = response.data;
 
       let resultData = null;
-      do {
-        const resultResponse = await axios.request({
+      do {        const resultResponse = await axios.request({
           method: "GET",
           url: `https://judge0-ce.p.rapidapi.com/submissions/${token}?base64_encoded=true`,
           headers: {
@@ -99,6 +103,7 @@ module.exports = async (client, message) => {
             "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
           },
         });
+        //console.log(resultResponse.data);
 
         resultData = resultResponse.data;
 
@@ -111,32 +116,50 @@ module.exports = async (client, message) => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } while (true);
 
-      if (resultData.status.id === 3) {
-        `Correct solution! You have earned ${questionData.points} points.`;
-      } else if (resultData.status.id === 4) {
+      if (resultData.status.id == 3) {
+        message.reply(`Correct solution! You have earned ${questionData.points} points.`);
+        let level = await Level.findOne({ where: { userId: message.author.id, guildId: config.testServer } });
+            //console.log(level);
+            if (level) {
+                level.level += questionData.points;
+                // Update database
+                await level.save().catch((e) => {
+                    console.log(`Error saving updated level ${e}`);
+                    return;
+                });
+            } else {
+                level = await Level.create({
+                    userId: message.author.id,
+                    guildId: message.guild.id,
+                    xp: 0,
+                    level: questionData.points
+                });
+            }
+            questionData.successfulSubmissions.push(message.author.id);
+            fs.writeFileSync(path.join(__dirname, '..',"..", '..', 'currentQuestion.json'), JSON.stringify(questionData));
+      } else{
         message.reply(
-          `Result: \n \`\`\` ${resultData.status.description} \`\`\``
+          `Result:\`\`\` ${resultData.status.description} \`\`\``
         );
-        if (
-          resultData.compiler_output &&
-          resultData.compiler_output.length > 0
-        ) {
+        //console.log(resultData.compile_output);
+        if (resultData.compile_output) {
           message.reply(
             `Compiler output: \`\`\`${Buffer.from(
-              resultData.compiler_output,
+              resultData.compile_output,
               "base64"
             ).toString("utf8")}\`\`\``
           );
         }
-        if (resultData.stderr && resultData.stderr > 0) {
-          message.reply(
-            `Standard error: \`\`\`${Buffer.from(
-              resultData.stderr,
-              "base64"
-            ).toString("utf8")}\`\`\``
-          );
-        }
-        if (resultData.stdout && resultData.stdout.length > 0) {
+        // if (resultData.stderr) {
+        //   message.reply(
+        //     `Standard error: \`\`\`${Buffer.from(
+        //       resultData.stderr,
+        //       "base64"
+        //     ).toString("utf8")}\`\`\``
+        //   );
+        // }
+        // if(!resultData.id === 4) return;
+        if (resultData.stdout) {
           const stdout = Buffer.from(resultData.stdout, "base64").toString(
             "utf8"
           );
@@ -147,21 +170,17 @@ module.exports = async (client, message) => {
           let passed = 0;
           let total = questionData.testCases.length;
           for (let i = 0; i < questionData.testCases.length; i++) {
-            console.log(result[i], questionData.testCases[i].expected);
+            //console.log(result[i], questionData.testCases[i].expected);
             if (result[i] == questionData.testCases[i].expected) {
               passed++;
             }
           }
 
-          message.reply(`Your Standard output: \`\`\`${stdout}\`\`\``);
+          //message.reply(`Your Standard output: \`\`\`${stdout}\`\`\``);
           message.reply(
             `You have passed ${passed} out of ${total} test case(s).`
           );
         }
-      } else {
-        message.reply(
-          `Result: \n \`\`\` ${resultData.status.description} \`\`\``
-        );
       }
     } catch (err) {
       message.reply("An error occurred while submitting your solution.");

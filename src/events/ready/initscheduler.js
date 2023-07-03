@@ -14,6 +14,7 @@ const generateQuestion = (client) => {
     const channel = client.channels.cache.get(config.questionsChannel);
     if (channel) {
         channel.send(
+            `<@&${config.pingRoles}> \n` +
             `**Question:** ${questionData.name}\n` +
             `**Points:** ${questionData.points}\n` +
             `**Supported Languages:** ${questionData.lang.map(item => `${item.lang} (time: ${item.time})`).join(', ')}\n` +
@@ -29,7 +30,7 @@ const generateQuestion = (client) => {
 }
 
 module.exports = (client) => {
-    generateQuestion(client);
+    //generateQuestion(client);
     cron.schedule('0 4 * * *', () => { //run at 4am everyday
         generateQuestion(client);
     });
