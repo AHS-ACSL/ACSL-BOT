@@ -6,27 +6,31 @@ const {
   } = require("discord.js");
 
 const roles = [
+    // {
+    //   id: "1116609854371549264",
+    //   label: "Java",
+    // },
+    // {
+    //   id: "1116609879411531867",
+    //   label: "Python 3",
+    // },
+    // {
+    //   id: "1116609910348730438",
+    //   label: "C++",
+    // },
     {
-      id: "1116609854371549264",
-      label: "Java",
-    },
-    {
-      id: "1116609879411531867",
-      label: "Python 3",
-    },
-    {
-      id: "1116609910348730438",
-      label: "C++",
-    },
+      id: "1125248687329779832",
+      label: "Click me!",
+    }
   ];
 
 module.exports = {
-    name: 'createselectplreactionroles',
+    name: 'sentreactionroles',
     description: 'Pong!',
     //devOnly: bool,
     //testOnly: bool,
     //options: Object[],
-    //deleted : bool,
+    //deleted : true,
 
     callback: async (client,interaction) =>{
         if (!interaction.member.permissions.has(8)){return}
@@ -46,8 +50,8 @@ module.exports = {
         });
 
         const message = new EmbedBuilder()
-          .setTitle("Choose the programming langauge you are familiar with.")
-          .setDescription("ACSL supports Java, Python 3, and C++.")
+          .setTitle("Click the button to get pinged when a new question is posted!")
+          .setDescription("Our grading server supports Javascript, Java, Python 3, and C++.")
           .setColor(13631488);
 
         await channel.send({

@@ -49,7 +49,7 @@ function getRandomInt(min, max) {
 
 
 module.exports = (client) => {
-    generateQuestion(client);
+    //generateQuestion(client);
     cron.schedule('0 4 * * *', () => { //run at 4am everyday
         generateQuestion(client);
     });

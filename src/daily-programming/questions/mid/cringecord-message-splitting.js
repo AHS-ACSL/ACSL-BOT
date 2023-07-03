@@ -17,7 +17,7 @@ module.exports = {
     'This system allows them to use less characters. However, the challenge is that these symbols can\'t be part of other words (for example, if "%" represents "but," it can\'t be used in "%ter" to mean "butter"). ' +
     "It's crucial to maintain readability, so words must not be split across messages.\n" +
     "You need to create the symbol system so it does not conflict with any words. every ASCII character will be a part of the string message.\n" +
-    "Given a set of 30 sentences(Repeat the loop 30 times), your task is to output the least number of messages Sebastian would need to send each sentence.\n" +
+    "Given a set of 19 sentences(Repeat the loop 19 times), your task is to output the least number of messages Sebastian would need to send each sentence.\n" +
     "Input: String/stdin\nOutput: Integer/stdout\n" +
     "You need to keep in mind the word-symbol mapping and Cringeord's 21-character limit per message. Note that spaces, punctuation, and symbols used for common words also count towards the character limit.\n" +
     "There will not be a sentence that has more than 21 connected characters.\n\n" +
@@ -71,39 +71,39 @@ module.exports = {
     },
     {
       input: "_(-8124 lsakjf pi is 3.1415926 because it is cool",
-      expected: 5,
+      expected: 3,
     },
     {
       input: "12408 asflbfu 075210958 1205978123 008213 2108351 0980125",
-      expected: 6,
+      expected: 3,
     },
     {
       input: "@!!%)( @!# Hello, how are you today? I hope you're doing well.",
-      expected: 2,
+      expected: 3,
     },
     {
       input: "This is a test sentence to check the symbol encoding and message splitting. @!#)(@!!%",
-      expected: 3,
+      expected: 4,
     },
     {
       input: "The quick brown fox jumps over the lazy dog, but the dog @!#)(@!!% doesn't seem to care.",
-      expected: 3,
+      expected: 4,
     },
     {
       input: "Can you believe it? @!!%) The cat caught a mouse @!#)(@!!% while we were sleeping.",
-      expected: 3,
+      expected: 4,
     },
     {
       input: "I'm planning a party @!#)(@!!% with balloons, cake, and lots of fun games. @!!%) Are you coming?",
-      expected: 4,
+      expected: 5,
     },
     {
       input: "@!!%)( @!# The weather forecast says it's going to rain tomorrow, @!#)(@!!% so don't forget your umbrella.",
-      expected: 4,
+      expected: 6,
     },
     {
       input: "I just bought a new phone, @!#)(@!!% and it has a powerful processor and a high-resolution screen.",
-      expected: 4,
+      expected: 5,
     },
     {
       input: "@!!%)( @!# The concert tickets sold out within minutes, @!#)(@!!% so I couldn't get any.",
@@ -111,51 +111,7 @@ module.exports = {
     },
     {
       input: "I'm excited for the weekend @!#)(@!!% because I'm going on a road trip with friends. @!!%)( @!#",
-      expected: 6,
-    },
-    {
-      input: "@!!%)( @!# My favorite food is pizza, @!!%) especially when it's topped with lots of cheese @!#)(@!!% and pepperoni.",
       expected: 5,
-    },
-    {
-      input: "I'm taking a break from work @!#)(@!!% and going on a vacation to a tropical island. @!!%) Can't wait!",
-      expected: 5,
-    },
-    {
-      input: "@!!%)( @!# I love solving puzzles and riddles, @!#)(@!!% they always keep my mind sharp.",
-      expected: 5,
-    },
-    {
-      input: "Yesterday, I watched a @!#)(@!!% thrilling movie that had me on the edge of my seat the whole time. @!!%",
-      expected: 5,
-    },
-    {
-      input: "@!!%)( @!# The traffic was terrible today, @!#)(@!!% and it took me twice as long to get to work.",
-      expected: 6,
-    },
-    {
-      input: "I'm learning to play the guitar, @!#)(@!!% and it's challenging but also very rewarding. @!!%) Practice makes perfect!",
-      expected: 5,
-    },
-    {
-      input: "@!!%)( @!# The bookstore has a wide selection of books, @!#)(@!!% so I spent hours browsing and couldn't decide which ones to buy.",
-      expected: 4,
-    },
-    {
-      input: "I'm attending a conference @!#)(@!!% next week, where I'll be presenting my research findings. @!!%) Wish me luck!",
-      expected: 5,
-    },
-    {
-      input: "@!!%)( @!# The restaurant serves delicious food @!#)(@!!% and has a cozy atmosphere. It's perfect for a romantic dinner.",
-      expected: 5,
-    },
-    {
-      input: "Today, I tried a new recipe @!#)(@!!% that I found online. It turned out to be a culinary masterpiece!",
-      expected: 6,
-    },
-    {
-      input: "@!!%)( @!# I'm starting a new fitness routine, @!!%) which includes cardio, strength training, and yoga. @!#)(@!!%",
-      expected: 6,
     },
   ],
 };
