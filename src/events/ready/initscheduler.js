@@ -14,12 +14,11 @@ const generateQuestion = (client) => {
     const channel = client.channels.cache.get(config.questionsChannel);
     if (channel) {
         channel.send(
-            `**Question: \n** ${questionData.questions}\n` +
+            `**Question:** ${questionData.name}\n` +
             `**Points:** ${questionData.points}\n` +
-            `**Supported Languages:** ${questionData.lang.join(', ')}\n` +
-            '```javascript\n' +
-            `${questionData.code}\n` +
-            '```'
+            `**Supported Languages:** ${questionData.lang.map(item => `${item.lang} (time: ${item.time})`).join(', ')}\n` +
+            `**Difficulty:** ${questionData.difficulty}\n` +
+            `**Instructions:** ${questionData.instruction}\n`
         );
     } else {
         console.error(`Could not find channel with ID: ${config.questionsChannel}`);
@@ -30,5 +29,8 @@ const generateQuestion = (client) => {
 }
 
 module.exports = (client) => {
-    //cron.schedule('*/1 * * * *', () => generateQuestion(client));
+    generateQuestion(client);
+    cron.schedule('0 4 * * *', () => { //run at 4am everyday
+        generateQuestion(client);
+    });
 };

@@ -3,10 +3,10 @@ const axios = require("axios");
 const path = require("path");
 const fs = require("fs");
 const util = require("util");
-const JSZip = require("jszip");
 const sequelize = require("../../index.js");
 const Level = sequelize.Level;
 const config = require("../../../config.json");
+const Buffer = require("buffer").Buffer;
 
 const languageIdMap = {
   js: 63,
@@ -25,8 +25,16 @@ module.exports = async (client, message) => {
   )
     return;
 
-    let questionData = JSON.parse(fs.readFileSync(path.join(__dirname, '..',"..", '..', 'currentQuestion.json'), 'utf-8'));
-    if(!questionData) return message.reply("No question is currently active. Please wait for a question to be generated.");
+  let questionData = JSON.parse(
+    fs.readFileSync(
+      path.join(__dirname, "..", "..", "..", "currentQuestion.json"),
+      "utf-8"
+    )
+  );
+  if (!questionData)
+    return message.reply(
+      "No question is currently active. Please wait for a question to be generated."
+    );
 
   const codeBlock = message.content.match(/```(\w+)\n([\s\S]*?)```/);
   if (!codeBlock) {
@@ -36,9 +44,9 @@ module.exports = async (client, message) => {
   }
 
   const language = codeBlock[1];
-  const code = codeBlock[2];
+  const code = Buffer.from(codeBlock[2]).toString("base64");
 
-  if (Object.keys(languageIdMap).includes(language)) {
+  if (!Object.keys(languageIdMap).includes(language)) {
     return message.reply(
       `Unsupported language. Supported languages are ${Object.keys(
         languageIdMap
@@ -46,40 +54,121 @@ module.exports = async (client, message) => {
     );
   }
 
-  const header = {
-    headers: {
-      "X-Auth-Token": process.env.JudgeAPI,
-    },
-  };
-
-  const zip = new JSZip();
-
-  //mutiple files
   const submissionData = {
-    language_id: 89, //mutiple files
-    additional_files: "",
-    cpu_time_limit: 10,
-    cpu_extra_time: 2,
+    source_code: code,
+    language_id: languageIdMap[language],
+    stdin: Buffer.from(
+      questionData.testCases
+        .map((testCase) => testCase.input.toString())
+        .join("\n")
+    ).toString("base64"),
+    expected_output: Buffer.from(
+      questionData.testCases
+        .map((testCase) => testCase.expected.toString())
+        .join("\n")
+    ).toString("base64"),
+    base64_encoded: true,
   };
 
-  switch (language) {
-    case "js":
-      break; //todo: etiher use vm or api
-    case "java":
-        zip.file("compile", `/usr/local/openjdk13/bin/javac Main.java ${questionData.lang[2].filename}.java`)
-        zip.file("run", `java -cp . ${questionData.lang[2].filename}`)
-        zip.file(`${questionData.lang[2].filename}.java`, code)
-        zip.file("Main.java", questionData.lang[2].main)
-        //to base64
-        const content = await zip.generateAsync({type:"base64"})
-        submissionData.additional_files = content
-        submissionData = questionData.lang[2].runtime
+  const options = {
+    method: "POST",
+    url: "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true",
+    headers: {
+      "X-RapidAPI-Key": process.env.JudgeAPI,
+      "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+      "Content-Type": "application/json",
+    },
+    data: submissionData,
+  };
 
+  try {
+    const response = await axios.request(options);
 
-      break; //todo: use api
-    case "cpp":
-      break; //todo: use api
-    case "py":
-      break; //todo: use api
+    console.log(response.data);
+    try {
+      const response = await axios.request(options);
+      const {token} = response.data;
+
+      let resultData = null;
+      do {
+        const resultResponse = await axios.request({
+          method: "GET",
+          url: `https://judge0-ce.p.rapidapi.com/submissions/${token}?base64_encoded=true`,
+          headers: {
+            "X-RapidAPI-Key": process.env.JudgeAPI,
+            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+          },
+        });
+
+        resultData = resultResponse.data;
+
+        if (resultData.status.id !== 2) {
+          // Not processing anymore
+          break;
+        }
+
+        // Wait a bit before checking again
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } while (true);
+
+      if (resultData.status.id === 3) {
+        `Correct solution! You have earned ${questionData.points} points.`;
+      } else if (resultData.status.id === 4) {
+        message.reply(
+          `Result: \n \`\`\` ${resultData.status.description} \`\`\``
+        );
+        if (
+          resultData.compiler_output &&
+          resultData.compiler_output.length > 0
+        ) {
+          message.reply(
+            `Compiler output: \`\`\`${Buffer.from(
+              resultData.compiler_output,
+              "base64"
+            ).toString("utf8")}\`\`\``
+          );
+        }
+        if (resultData.stderr && resultData.stderr > 0) {
+          message.reply(
+            `Standard error: \`\`\`${Buffer.from(
+              resultData.stderr,
+              "base64"
+            ).toString("utf8")}\`\`\``
+          );
+        }
+        if (resultData.stdout && resultData.stdout.length > 0) {
+          const stdout = Buffer.from(resultData.stdout, "base64").toString(
+            "utf8"
+          );
+          const result = stdout
+            .split("\n")
+            .map((item) => item.trim() === "true");
+
+          let passed = 0;
+          let total = questionData.testCases.length;
+          for (let i = 0; i < questionData.testCases.length; i++) {
+            console.log(result[i], questionData.testCases[i].expected);
+            if (result[i] == questionData.testCases[i].expected) {
+              passed++;
+            }
+          }
+
+          message.reply(`Your Standard output: \`\`\`${stdout}\`\`\``);
+          message.reply(
+            `You have passed ${passed} out of ${total} test case(s).`
+          );
+        }
+      } else {
+        message.reply(
+          `Result: \n \`\`\` ${resultData.status.description} \`\`\``
+        );
+      }
+    } catch (err) {
+      message.reply("An error occurred while submitting your solution.");
+      console.log(err);
+    }
+  } catch (err) {
+    console.error(err);
+    message.reply("An error occurred while submitting your solution.");
   }
 };
