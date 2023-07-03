@@ -1,8 +1,7 @@
 module.exports = {
   name: "Leap Years",
   lang: [{lang:"js", time: 1} , {lang:"py", time: 1}, {lang:"cpp", time: 1}, {lang:"java", time: 1}],
-  submitFile: false, //false means code segment only
-  points: 5,
+  points: 1,
   difficulty: "my dog can do it",
   instruction:
     "Submit to ACSL BOT by dm\n " +
@@ -29,7 +28,4 @@ module.exports = {
     {input: 2036, expected: true},
     {input: 2040, expected: true},
   ],
-  functionName: "isLeapYear",
-  params: ["year"],
-  aigrading: false,
 };
