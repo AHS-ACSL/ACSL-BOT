@@ -76,7 +76,7 @@ module.exports = async (client, message) => {
         .map((testCase) => testCase.expected.toString())
         .join("\n")
     ).toString("base64"),
-    base64_encoded: true,
+    cpu_time_limit: questionData.lang.find(e => e.lang === language).time,
   };
 
   const options = {
