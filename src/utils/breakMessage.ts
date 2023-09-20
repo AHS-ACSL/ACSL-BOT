@@ -1,7 +1,9 @@
-async function sendMessage(channel, message, options = {}) {
+import { TextChannel } from 'discord.js';
+
+async function sendMessage(channel: TextChannel, message: string): Promise<void> {
     // Split the message into lines
     let lines = message.split('\n');
-    let messageChunks = [];
+    let messageChunks: string[] = [];
     let currentChunk = '';
 
     // Combine lines back into chunks of less than or equal to 2000 characters
@@ -32,8 +34,8 @@ async function sendMessage(channel, message, options = {}) {
 
     // Send each chunk as a separate message
     for (const chunk of messageChunks) {
-        await channel.send(chunk, options);
+        await channel.send(chunk);
     }
 }
 
-module.exports = sendMessage;
+export default sendMessage;
