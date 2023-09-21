@@ -1,33 +1,36 @@
-const config = require('../../../config.json');
+import { Client, Message, TextChannel } from 'discord.js';
+import config from '../../../config.json';
 
-let lastCount = 0;
-let lastMsgAuthor;
+let lastCount: number = 0;
+let lastMsgAuthor: string | null;
 
-module.exports = async (client, message) => {
+const countingHandler = async (client: Client, message: Message): Promise<void> => {
     if (!message.guild || message.author.bot) return;
 
-    const countingChannel = client.channels.cache.get(config.countingChannel);
+    const countingChannel: TextChannel | undefined = client.channels.cache.get(config.countingChannel) as TextChannel;
     if (!countingChannel) return;
 
     if (message.channel.id === countingChannel.id) {
-        let currentCount = parseInt(message.content);
+        let currentCount: number = parseInt(message.content);
 
         // Check if the message is a valid number
         if (isNaN(currentCount)) {
-            message.react('❌');
-            countingChannel.send(`Unable to parse as a number, next number is ${lastCount + 1}.`);
+            await message.react('❌');
+            await countingChannel.send(`Unable to parse as a number, next number is ${lastCount + 1}.`);
             return;
         }
 
         if (currentCount === lastCount + 1 && (!lastMsgAuthor || message.author.id !== lastMsgAuthor)) {
-            message.react('👍');
+            await message.react('👍');
             lastCount = currentCount;
             lastMsgAuthor = message.author.id;
         } else {
-            message.react('❌');
-            countingChannel.send(`${message.author.username} messed up at number ${lastCount + 1}. Restarting at 1.`);
+            await message.react('❌');
+            await countingChannel.send(`${message.author.username} messed up at number ${lastCount + 1}. Restarting at 1.`);
             lastCount = 0;
             lastMsgAuthor = null;
         }
     }
 };
+
+export default countingHandler;

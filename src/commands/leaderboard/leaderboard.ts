@@ -1,5 +1,6 @@
-const sequelize = require('../../index.js');
-const Level = sequelize.Level;
+import sequelize from '../../index.js';
+//TODO: remove any
+const Level:any = sequelize.Level;
 
 const generateLeaderboard = async (guildId) => {
   try {
@@ -18,7 +19,7 @@ const generateLeaderboard = async (guildId) => {
   }
 };
 
-module.exports = {
+export default {
   name: 'leaderboard',
   description: 'Show the current level leaderboard',
   callback: async (client, interaction) => {

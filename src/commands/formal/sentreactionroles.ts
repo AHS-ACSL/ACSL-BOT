@@ -1,9 +1,9 @@
-const {
-    EmbedBuilder,
-    ActionRowBuilder,
-    ButtonStyle,
-    ButtonBuilder,
-  } = require("discord.js");
+import {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonStyle,
+  ButtonBuilder,
+} from "discord.js";
 
 const roles = [
     // {
@@ -26,7 +26,7 @@ const roles = [
 
 module.exports = {
     name: 'sentreactionroles',
-    description: 'Pong!',
+    description: 'admin only',
     //devOnly: bool,
     //testOnly: bool,
     //options: Object[],

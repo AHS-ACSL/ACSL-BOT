@@ -1,9 +1,7 @@
-const {ApplicationCommandOptionType, EmbedBuilder} = require("discord.js");
-const {OpenAIApi, Configuration} = require("openai");
-
-const config = require("../../../config.json");
-
-module.exports = {
+import {EmbedBuilder} from "discord.js";
+import {OpenAIApi, Configuration} from "openai"; 
+import config from "../../../config.json";
+export default {
   name: "ask",
   description: "Most advance nested if statements powered ask command",
   //devOnly: bool,
@@ -12,7 +10,7 @@ module.exports = {
     {
       name: "prompt",
       description: "your legit question",
-      type: ApplicationCommandOptionType.String,
+      type: 3,
       required: true,
     },
   ],
@@ -97,7 +95,7 @@ module.exports = {
 
     const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
-      messages: conversationlog,
+      messages: conversationlog as any,
     });
 
     //console.log(response.data.choices[0].message);

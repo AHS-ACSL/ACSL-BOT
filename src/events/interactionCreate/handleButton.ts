@@ -1,4 +1,4 @@
-module.exports = async (client, interaction) => {
+export default async (client, interaction) => {
     if (!interaction.isButton()) return;
     await interaction.deferReply({ephemeral: true});
       const role = interaction.guild.roles.cache.get(interaction.customId);

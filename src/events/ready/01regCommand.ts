@@ -1,20 +1,20 @@
 import { Client, ApplicationCommand } from "discord.js"; // Import relevant types from discord.js
 import { testServer } from "../../../config.json";
 import getApplicationCommands from "../../utils/getApplicationCommands";
-import getloadCommands,{ Command } from "../../utils/getLocalCommands";
+import getlocalCommands,{ Command } from "../../utils/getLocalCommands";
 import isCommandsDifferent from "../../utils/isCommandsDifferent";
 
 const regCommand = async (client: Client) => {
   try {
-    const localCommands: Command[] = getloadCommands();
+    const localCommands: Command[] = await getlocalCommands();
     const applicationCommands = await getApplicationCommands(
       client,
       testServer
     );
 
+    console.log(localCommands);
     for (const localCommand of localCommands) {
       const { name, description, options } = localCommand;
-
       const existingCommand = applicationCommands.cache.find(
         (cmd) => cmd.name === name
       );
@@ -44,7 +44,8 @@ const regCommand = async (client: Client) => {
       }
     }
   } catch (error) {
-    console.log(`Error registering commands: ${error}`);
+    console.error(`Error registering commands: ${error}`);
+
   }
 };
 

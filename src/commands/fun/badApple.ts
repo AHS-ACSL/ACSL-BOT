@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     name: 'badapple',
     description: 'Stop with the Bad Apple meme',
     callback: async (client, interaction) => {

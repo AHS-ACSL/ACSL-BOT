@@ -21,7 +21,7 @@ const client: Client = new Client({
   ],
 });
 
-interface ExtendedSequelize extends Sequelize {
+export interface LevelSequelize extends Sequelize {
     Level: typeof Model
 }
 
@@ -30,7 +30,7 @@ const sequelize = new Sequelize(process.env.DB_NAME!, process.env.DB_USER!, proc
   port: parseInt(process.env.DB_PORT!),
   dialect: 'mysql',
   logging: false,
-}) as ExtendedSequelize;
+}) as LevelSequelize;
 
 sequelize.Level = LevelModel(sequelize);
 

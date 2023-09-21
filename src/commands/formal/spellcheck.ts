@@ -1,4 +1,4 @@
-const spellchecker = require('simple-spellchecker');
+import spellchecker from 'simple-spellchecker';
 const dictionary = spellchecker.getDictionarySync("en-US");
 
 module.exports = {

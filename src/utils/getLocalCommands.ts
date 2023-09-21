@@ -13,7 +13,7 @@ export interface Command {
     callback?: (client: any, interaction: any) => Promise<void>;
 }
 
-const getloadCommands = (exceptions: string[] = []): Command[] => {
+const getlocalCommands = async (exceptions: string[] = []): Promise<Command[]> => {
     let localCommands: Command[] = [];
 
     const commandsCategories = getAllFiles(path.join(__dirname, '..', 'commands'), true);
@@ -22,13 +22,15 @@ const getloadCommands = (exceptions: string[] = []): Command[] => {
         const commandFiles = getAllFiles(commandCategory);
 
         for (const commandFile of commandFiles) {
-            const commandObject: Command = require(commandFile);
-            if (exceptions.includes(commandObject.name)) continue;
-            localCommands.push(commandObject);
+            const commandObject = await import(commandFile);
+            if (exceptions.includes(commandObject.default.name)) continue;
+            localCommands.push(commandObject.default);
         }
     }
 
+    console.log(`returned ${localCommands.length} commands`);
     return localCommands;
-}
+};
 
-export default getloadCommands;
+
+export default getlocalCommands;

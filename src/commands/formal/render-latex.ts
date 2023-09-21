@@ -1,10 +1,10 @@
-const {ApplicationCommandOptionType} = require("discord.js");
-module.exports = {
+import { ApplicationCommandOptionType } from "discord.js";
+export default {
     name: 'render-latex',
     description: 'finally something useful',
     //devOnly: bool,
     //testOnly: bool,
-    options: Object[
+    options: [
         {
             name: "code",
             description: "The latex code to render",
@@ -12,7 +12,7 @@ module.exports = {
             required: true
         }
     ],
-    //deleted : bool,
+    deleted : true,
 
     callback: async (client,interaction) =>{
         const code = interaction.options.getString("code");

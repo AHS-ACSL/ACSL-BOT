@@ -1,19 +1,36 @@
-const { VM } = require('vm2');
-const axios = require('axios');
-const util = require('util');
+import { Client, Message } from "discord.js";
+import axios from "axios";
+import util from "util";
+import { VM } from "vm2";
 
-const languageIdMap = {
+const languageIdMap: Record<string, number> = {
     cpp: 54,
     java: 62,
     js: 63,
     py: 71
 };
 
-const options = {
+interface RequestOptions {
+    method: 'POST',
+    url: string,
+    headers: {
+        'X-RapidAPI-Key': string,
+        'X-RapidAPI-Host': string,
+        'Content-Type': string
+    },
+    data: {
+        source_code: string,
+        stdin?: string,
+        language_id?: number,
+        cpu_time_limit?: number
+    }
+}
+
+const options: RequestOptions = {
     method: 'POST',
     url: 'https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true',
     headers: {
-        'X-RapidAPI-Key': process.env.JudgeAPI,
+        'X-RapidAPI-Key': process.env.JudgeAPI as string,
         'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
         'Content-Type': 'application/json'
     },
@@ -85,7 +102,7 @@ async function runCode(client, message, language, code) {
 
 
 
-module.exports = async (client, message) => {
+export default async (client, message) => {
     if (!message.guild || message.author.bot) return;
     if (message.content.toLowerCase().startsWith('!run')) {
         const codeBlock = message.content.split('```');

@@ -109,7 +109,7 @@
 
   "include": [
     "src/**/*.ts"
-  ],
+, "src/events/ready/initscheduler.abandon"  ],
   "exclude": [
     "node_modules"
   ]

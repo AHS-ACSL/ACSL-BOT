@@ -1,14 +1,16 @@
 import { Client, CommandInteraction } from "discord.js";
 import { devs, testServer } from "../../../config.json";
-import getloadCommands, { Command } from "../../utils/getLocalCommands";
+import getlocalCommands, { Command } from "../../utils/getLocalCommands";
 
 const handleInteraction = async (client: Client, interaction): Promise<void> => {
     if (!interaction.isCommand()) return;
 
-    const localCommands = getloadCommands();
+    const localCommands = await getlocalCommands();
 
     try {
         const commandObject = localCommands.find((cmd) => cmd.name === interaction.commandName) as Command;
+        console.log(commandObject);
+        console.log(localCommands);
         if (!commandObject) return;
         
         if (commandObject.devOnly && !devs.includes(interaction.user.id)) {

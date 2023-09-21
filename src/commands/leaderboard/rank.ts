@@ -1,5 +1,6 @@
-const sequelize = require('../../index.js');
-const Level = sequelize.Level;
+import sequelize from '../../index.js';
+//TODO: remove any
+const Level:any = sequelize.Level;
 
 const getUserLevel = async (userId, guildId) => {
   try {
@@ -13,7 +14,7 @@ const getUserLevel = async (userId, guildId) => {
   }
 };
 
-module.exports = {
+export default {
   name: 'rank',
   description: 'Show your current level',
   callback: async (client, interaction) => {

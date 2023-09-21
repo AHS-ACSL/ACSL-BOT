@@ -1,6 +1,6 @@
-const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
+import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 
-module.exports = {
+export default{
   name: "embed",
   description: "Send an embed message",
   options: [

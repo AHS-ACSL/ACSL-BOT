@@ -1,11 +1,15 @@
-const { Client, Message } = require('discord.js');
-const calculateLevelXp = require('../../utils/calculateLevelXp');
-const sequelize = require('../../index.js');
-const config = require('../../../config.json');
-const Level = sequelize.Level;
-const cooldowns = new Set();
+import { Client, Message, GuildChannel } from 'discord.js';
+import calculateLevelXp from '../../utils/calculateLevelXp';
+import sequelize from '../../index';
+import config from '../../../config.json';
 
-function getRandomXp(min, max) {
+
+
+//TODO: remove any
+const LevelData: any  = sequelize.Level;
+const cooldowns = new Set<string>();
+
+function getRandomXp(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -13,39 +17,39 @@ function getRandomXp(min, max) {
 
 /**
  *
- * @param {Client} client
- * @param {Message} message
+ * @param client - The Discord client
+ * @param message - The message that was sent
  */
-module.exports = async (client, message) => {
+export default async (client: Client, message: Message): Promise<void> => {
   if (!message.guild || message.author.bot || cooldowns.has(message.author.id)) return;
 
   const xpToGive = getRandomXp(5, 15);
 
   try {
-    let level = await Level.findOne({ where: { userId: message.author.id, guildId: message.guild.id } });
+    let level = await LevelData.findOne({ where: { userId: message.author.id, guildId: message.guild.id } });
     if (level) {
       level.xp += xpToGive;
 
       if (level.xp > calculateLevelXp(level.level)) {
         level.xp = 0;
         level.level += 1;
-        //message.member for ping
-        let redirectChannel = client.channels.cache.get(config.levelingChannel);
 
-        redirectChannel.send(`${message.member.displayName} you have leveled up to **level ${level.level}**.`);
+        let redirectChannel = client.channels.cache.get(config.levelingChannel) as GuildChannel;
+
+        (redirectChannel as any).send(`${message.member!.displayName} you have leveled up to **level ${level.level}**.`);
       }
 
-      await level.save().catch((e) => {
-        console.log(`Error saving updated level ${e}`);
+      await level.save().catch((e: Error) => {
+        console.log(`Error saving updated level ${e.message}`);
         return;
       });
+
       cooldowns.add(message.author.id);
       setTimeout(() => {
         cooldowns.delete(message.author.id);
       }, 60000);
-    }
-    else {
-      level = await Level.create({
+    } else {
+      level = await level.create({
         userId: message.author.id,
         guildId: message.guild.id,
         xp: xpToGive,
@@ -56,7 +60,7 @@ module.exports = async (client, message) => {
         cooldowns.delete(message.author.id);
       }, 60000);
     }
-  } catch (error) {
-    console.log(`Error giving xp: ${error}`);
+  } catch (error: any) {
+    console.log(`Error giving xp: ${error.message}`);
   }
 };
