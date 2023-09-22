@@ -1,36 +1,24 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import mongoose from 'mongoose';
 
-class Level extends Model {
-    public userId!: string;
-    public guildId!: string;
-    public xp!: number;
-    public level!: number;
-}
+const LevelSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+    required: true,
+  },
+  guildId: {
+    type: String,
+    required: true,
+  },
+  xp: {
+    type: Number,
+    default: 0,
+  },
+  level: {
+    type: Number,
+    default: 0,
+  },
+});
 
-const initializeLevelModel = (sequelize: Sequelize): typeof Level => {
-    Level.init({
-        userId: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        guildId: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        xp: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0,
-        },
-        level: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0,
-        },
-    }, {
-        sequelize,
-        modelName: 'Level',
-    });
+const Level = mongoose.model('Level', LevelSchema);
 
-    return Level;
-};
-
-export default initializeLevelModel;
+export default Level;

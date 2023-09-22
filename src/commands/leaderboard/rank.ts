@@ -1,13 +1,9 @@
-import sequelize from '../../index.js';
-//TODO: remove any
-const Level:any = sequelize.Level;
 
+import { Client, CommandInteraction } from 'discord.js';
+import Level from '../../models/Level';
 const getUserLevel = async (userId, guildId) => {
   try {
-    const level = await Level.findOne({
-      where: { userId: userId, guildId: guildId },
-    });
-
+    const level = await Level.findOne({ userId: userId, guildId: guildId });
     return level;
   } catch (error) {
     console.log(`Error retrieving user level: ${error}`);
@@ -17,7 +13,7 @@ const getUserLevel = async (userId, guildId) => {
 export default {
   name: 'rank',
   description: 'Show your current level',
-  callback: async (client, interaction) => {
+  async callback(client: Client, interaction: CommandInteraction) { 
     try {
       const userId = interaction.user.id;
       const guildId = interaction.guild.id;

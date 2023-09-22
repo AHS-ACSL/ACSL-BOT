@@ -1,12 +1,8 @@
 import { Client, Message, GuildChannel } from 'discord.js';
 import calculateLevelXp from '../../utils/calculateLevelXp';
-import sequelize from '../../index';
 import config from '../../../config.json';
+import Level from '../../models/Level';
 
-
-
-//TODO: remove any
-const LevelData: any  = sequelize.Level;
 const cooldowns = new Set<string>();
 
 function getRandomXp(min: number, max: number): number {
@@ -15,18 +11,14 @@ function getRandomXp(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/**
- *
- * @param client - The Discord client
- * @param message - The message that was sent
- */
 export default async (client: Client, message: Message): Promise<void> => {
   if (!message.guild || message.author.bot || cooldowns.has(message.author.id)) return;
 
   const xpToGive = getRandomXp(5, 15);
 
   try {
-    let level = await LevelData.findOne({ where: { userId: message.author.id, guildId: message.guild.id } });
+    let level = await Level.findOne({ userId: message.author.id, guildId: message.guild.id });
+
     if (level) {
       level.xp += xpToGive;
 
@@ -49,10 +41,16 @@ export default async (client: Client, message: Message): Promise<void> => {
         cooldowns.delete(message.author.id);
       }, 60000);
     } else {
-      level = await level.create({
+      const newLevel = new Level({
         userId: message.author.id,
         guildId: message.guild.id,
         xp: xpToGive,
+        level: 0 // Initialize with level 0
+      });
+
+      await newLevel.save().catch((e: Error) => {
+        console.log(`Error saving new level: ${e.message}`);
+        return;
       });
 
       cooldowns.add(message.author.id);

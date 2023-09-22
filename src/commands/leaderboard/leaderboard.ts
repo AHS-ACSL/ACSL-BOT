@@ -1,17 +1,13 @@
-import sequelize from '../../index.js';
-//TODO: remove any
-const Level:any = sequelize.Level;
+
+import { Client, CommandInteraction } from 'discord.js'; 
+import Level from '../../models/Level';
 
 const generateLeaderboard = async (guildId) => {
   try {
-    const leaderboard = await Level.findAll({
-      where: { guildId: guildId },
-      order: [
-        ['level', 'DESC'],
-        ['xp', 'DESC'],
-      ],
-      limit: 10 // limit the leaderboard to top 10
-    });
+    const leaderboard = await Level.find({ guildId: guildId })
+      .sort({ level: -1, xp: -1 }) 
+      .limit(10)
+      .exec();
 
     return leaderboard;
   } catch (error) {
@@ -22,7 +18,7 @@ const generateLeaderboard = async (guildId) => {
 export default {
   name: 'leaderboard',
   description: 'Show the current level leaderboard',
-  callback: async (client, interaction) => {
+  async callback(client: Client, interaction: CommandInteraction) {
     try {
       const guildId = interaction.guild.id;
       const leaderboard = await generateLeaderboard(guildId);
