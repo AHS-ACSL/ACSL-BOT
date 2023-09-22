@@ -8,6 +8,17 @@ const latexHandler = async (
     message: Message
   ): Promise<void> => {
     if (!message.guild || message.author.bot) return;
+
+
+    if(!message.content.startsWith("!render") && !message.content.match(/\$\$.*?\$\$|\$.*?\$/g)){
+      return;
+    }
+    if(message.content.startsWith("!render")){
+      message.content = message.content.replace("!render", "");
+    }
+    //react checkmark
+    message.react("✅");
+
   
     const md = new MarkdownIt();
     md.use(mdKatex, {"throwOnError" : false, "errorColor" : " #cc0000"});
