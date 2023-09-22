@@ -16,6 +16,7 @@ const latexHandler = async (
     if(message.content.startsWith("!render")){
       message.content = message.content.replace("!render", "");
     }
+    console.log("attempting to render latex");
     //react checkmark
     message.react("✅");
 

@@ -28,7 +28,7 @@ const getlocalCommands = async (exceptions: string[] = []): Promise<Command[]> =
         }
     }
 
-    console.log(`returned ${localCommands.length} commands`);
+    //console.log(`returned ${localCommands.length} commands`);
     return localCommands;
 };
 

@@ -12,7 +12,7 @@ const regCommand = async (client: Client) => {
       testServer
     );
 
-    console.log(localCommands);
+    //console.log(localCommands);
     for (const localCommand of localCommands) {
       const { name, description, options } = localCommand;
       const existingCommand = applicationCommands.cache.find(
