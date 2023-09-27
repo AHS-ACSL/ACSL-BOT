@@ -65,7 +65,7 @@ async function runCode(client, message, language, code) {
       ephemeral: true,
     });
   }
-  options.data.cpu_time_limit = 10;
+  options.data.cpu_time_limit = 15;
 
   message.react("✅");
 
@@ -126,7 +126,7 @@ async function runCode(client, message, language, code) {
           ephemeral: true,
         });
       }
-    }, 5000);
+    }, 20000);
   } catch (error) {
     console.log("Error:", error.message);
     message.reply({
