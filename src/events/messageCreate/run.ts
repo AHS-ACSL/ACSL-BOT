@@ -8,6 +8,17 @@ const languageIdMap: Record<string, number> = {
   py: 71,
   kt: 78,
   ts: 94,
+  lua: 64,
+  c: 50,
+  "c#": 51,
+  nasm: 45,
+  bash: 46,
+  lisp: 55,
+  haskell: 61,
+  go: 88,
+  rust: 73,
+  sql: 82,
+  swift:83
 };
 
 interface RequestOptions {
@@ -42,12 +53,12 @@ const options: RequestOptions = {
 
 async function runCode(client, message, language, code) {
   options.data.source_code = Buffer.from(code).toString("base64");
-  options.data.language_id = languageIdMap[language];
+  options.data.language_id = languageIdMap[language.toLowerCase()];
   //check if language is valid
   if (!options.data.language_id) {
     message.react("❌");
     return message.reply({
-      content: `Invalid language. Supported languages: js, cpp, py, java, kt, ts`,
+      content: `Invalid language. Supported languages: js, cpp, py, java, kt, ts, lua, c, c#, nasm, bash, lisp, haskell, go, rust, sql, swift`,
       ephemeral: true,
     });
   }
@@ -128,8 +139,8 @@ export default async (client, message) => {
       message.react("❌");
       return message.reply({
         content:
-          'Invalid format. Code must be surrounded by triple backticks and the language specified(js, cpp, py, java, kt, ts). \nExample:\n!run\n```cpp\n#include<iostream>\n\nint main() {\n\tstd::cout << "Your code here";\n\treturn 0;\n}\n```',
-        emphemeral: true,
+          'Invalid format. Code must be surrounded by triple backticks and the language specified(js, cpp, py, java, kt, ts, lua, c, c#, nasm, bash, lisp, haskell, go, rust, sql, swift). \nExample:\n!run\n\\```cpp\n#include<iostream>\n\nint main() {\n\tstd::cout << "Your code here";\n\treturn 0;\n}\n\\```',
+          ephemeral: true,
       });
     }
     const languageAndCode = codeBlock[1].split("\n");
