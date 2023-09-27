@@ -1,25 +1,27 @@
 import { Client, Message } from "discord.js";
 import axios from "axios";
 
-const languageIdMap: Record<string, number> = {
+const domain="localhost:2358"
+const languageIdMap = {
   cpp: 54,
-  java: 91,
-  js: 93,
-  py: 71,
+  java: 62,
+  js: 63,
+  py: 70,
   kt: 78,
-  ts: 94,
+  ts: 74,
   lua: 64,
-  c: 50,
+  c: 75,
   "c#": 51,
   nasm: 45,
   bash: 46,
   lisp: 55,
   haskell: 61,
-  go: 88,
+  go: 60,
   rust: 73,
   sql: 82,
-  swift:83
+  swift: 83
 };
+
 
 interface RequestOptions {
   method: "POST";
@@ -39,7 +41,7 @@ interface RequestOptions {
 
 const options: RequestOptions = {
   method: "POST",
-  url: "http://localhost:2358/submissions?base64_encoded=true",
+  url: `http://${domain}/submissions?base64_encoded=true`,
   headers: {
     // 'X-RapidAPI-Key': process.env.JudgeAPI as string,
     // 'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
@@ -55,6 +57,7 @@ async function runCode(client, message, language, code) {
   options.data.source_code = Buffer.from(code).toString("base64");
   options.data.language_id = languageIdMap[language.toLowerCase()];
   //check if language is valid
+  console.log("langid: ", options.data.language_id);
   if (!options.data.language_id) {
     message.react("❌");
     return message.reply({
@@ -68,13 +71,14 @@ async function runCode(client, message, language, code) {
 
   try {
     const response = await axios.request(options);
+    console.log("response", response.data);
     const submission_token = response.data.token;
     console.log("response", response.data);
 
     setTimeout(async () => {
       try {
         const result = await axios.get(
-          `http://localhost:2358/submissions/${submission_token}?base64_encoded=true`,
+          `http://${domain}/submissions/${submission_token}?base64_encoded=true`,
           {
             headers: {
               // 'X-RapidAPI-Key': process.env.JudgeAPI,
@@ -124,6 +128,7 @@ async function runCode(client, message, language, code) {
       }
     }, 5000);
   } catch (error) {
+    console.log("Error:", error.message);
     message.reply({
       content: `Error while running code: ${error.message}`,
       ephemeral: true,
