@@ -14,8 +14,8 @@ interface RequestOptions {
     method: 'POST',
     url: string,
     headers: {
-        'X-RapidAPI-Key': string,
-        'X-RapidAPI-Host': string,
+        // 'X-RapidAPI-Key': string,
+        // 'X-RapidAPI-Host': string,
         'Content-Type': string
     },
     data: {
@@ -28,10 +28,10 @@ interface RequestOptions {
 
 const options: RequestOptions = {
     method: 'POST',
-    url: 'https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true',
+    url: 'http://localhost:2358/submissions?base64_encoded=true',
     headers: {
-        'X-RapidAPI-Key': process.env.JudgeAPI as string,
-        'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+        // 'X-RapidAPI-Key': process.env.JudgeAPI as string,
+        // 'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
         'Content-Type': 'application/json'
     },
     data: {
@@ -42,8 +42,10 @@ const options: RequestOptions = {
 
 async function runCode(client, message, language, code) {
     if (language === 'js') {
-        message.reply('Starting VM, please wait...');
-        
+
+        //react checkmark
+        message.react('✅');
+
         // Custom console.log to capture output
         let output = '';
         const log = (...args) => {
@@ -64,19 +66,23 @@ async function runCode(client, message, language, code) {
         options.data.source_code = Buffer.from(code).toString('base64');
         options.data.language_id = languageIdMap[language];
         options.data.cpu_time_limit = 10;
-        message.reply('Awaiting reponse from docker, this may take a while...');
+        
+        message.react('✅');
+
         try {
             const response = await axios.request(options);
             const submission_token = response.data.token;
+            console.log("response", response.data);
 
             setTimeout(async () => {
                 try {
-                    const result = await axios.get(`https://judge0-ce.p.rapidapi.com/submissions/${submission_token}?base64_encoded=true`, {
+                    const result = await axios.get(`http://localhost:2358/submissions/${submission_token}?base64_encoded=true`, {
                         headers: {
-                            'X-RapidAPI-Key': process.env.JudgeAPI,
-                            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+                            // 'X-RapidAPI-Key': process.env.JudgeAPI,
+                            // 'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
                         }
                     });
+                    console.log('Result Response:', result.data);
                     let { stdout, stderr, message: resultMessage, time, compile_output } = result.data;
                     stdout = stdout ? Buffer.from(stdout, 'base64').toString() : null;
                     stderr = stderr ? Buffer.from(stderr, 'base64').toString() : null;
@@ -84,13 +90,21 @@ async function runCode(client, message, language, code) {
                     if (stdout) {
                         message.reply(`\nOutput:\n\`\`\`${stdout}\`\`\``);
                     } else if (stderr || resultMessage || compile_output) {
-                        message.reply(`\nError:\n\`\`\`${stderr || resultMessage || compile_output}\`\`\``);
+                        //change checkmark to x
+                        message.reactions.removeAll();
+                        message.react('❌');
+                        message.reply({message: `\nError:\n\`\`\`${stderr || resultMessage || compile_output}\`\`\``, ephemeral: true});
                     }
                     if (result.data.time_limit_exceeded) {
+                        message.reactions.removeAll();
+                        //react clock
+                        message.react('🕒');
                         message.reply(`Execution exceeded the time limit.`);
                     }
                 } catch (error) {
-                    message.reply(`Error fetching result: ${error.message}`);
+                    message.reactions.removeAll();
+                    message.react('❌');
+                    message.reply({message:`Error fetching result: ${error.message}` , ephemeral: true});
                 }
             }, 5000);
         } catch (error) {
