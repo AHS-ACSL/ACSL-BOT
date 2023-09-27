@@ -8,6 +8,10 @@ const dictionary = spellchecker.getDictionarySync("en-US");
 const spelltracker = async (client: Client, message: Message): Promise<void> => {
   if (!message.guild || message.author.bot) return;
 
+  if (message.content.startsWith("!")) return;
+  const isLatex = message.content.match(/\$/g);
+  if(isLatex && isLatex.length >= 2) return;
+
   const namedEntities = nlp(message.content).people().out('array');
   const places = nlp(message.content).places().out('array');
   const pronouns = nlp(message.content).pronouns().out('array');

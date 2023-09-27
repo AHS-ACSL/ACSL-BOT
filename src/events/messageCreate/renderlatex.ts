@@ -50,6 +50,7 @@ const latexHandler = async (
     if(!message.content.startsWith("!render") && !message.content.match(/\$\$.*?\$\$|\$.*?\$/g)){
         return;
     }
+    if(message.content.startsWith("!run")) return;
     if(message.content.startsWith("!render")){
         message.content = message.content.replace("!render", "");
     }

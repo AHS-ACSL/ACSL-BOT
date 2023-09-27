@@ -4,7 +4,7 @@ import { Client, Message } from 'discord.js';
 function getReply(message: string): string | null {
     const doc = nlp(message.toLowerCase());
 
-    if (doc.has('hello')) {
+    if (message.toLowerCase() == "hello") {
         return "World!";
     }
 
@@ -18,6 +18,9 @@ function getReply(message: string): string | null {
 
     if (doc.has('java (bad|terrible|horrible|awful|worst)')) {
         return "I agree.";
+    }
+    if(doc.has('ban') && (doc.has('#Pronoun') || doc.has('#Person'))){
+        return "Lets not do that.";
     }
 
     if (doc.has('#QuestionWord') && (doc.has('#Verb') || doc.has("#Auxiliary") || doc.has("#Copula")) && (doc.has('meet') || doc.has("club"))) {

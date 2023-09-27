@@ -75,58 +75,7 @@ async function runCode(client, message, language, code) {
     const submission_token = response.data.token;
     console.log("response", response.data);
 
-    setTimeout(async () => {
-      try {
-        const result = await axios.get(
-          `http://${domain}/submissions/${submission_token}?base64_encoded=true`,
-          {
-            headers: {
-              // 'X-RapidAPI-Key': process.env.JudgeAPI,
-              // 'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
-            },
-          }
-        );
-        console.log("Result Response:", result.data);
-        let {
-          stdout,
-          stderr,
-          message: resultMessage,
-          time,
-          compile_output,
-        } = result.data;
-        stdout = stdout ? Buffer.from(stdout, "base64").toString() : null;
-        stderr = stderr ? Buffer.from(stderr, "base64").toString() : null;
-        compile_output = compile_output
-          ? Buffer.from(compile_output, "base64").toString()
-          : null;
-        if (stdout) {
-          message.reply(`\nOutput:\n\`\`\`${stdout}\`\`\``);
-        } else if (stderr || resultMessage || compile_output) {
-          //change checkmark to x
-          message.reactions.removeAll();
-          message.react("❌");
-          message.reply({
-            content: `\nError:\n\`\`\`${
-              stderr || resultMessage || compile_output
-            }\`\`\``,
-            ephemeral: true,
-          });
-        }
-        if (result.data.time_limit_exceeded) {
-          message.reactions.removeAll();
-          //react clock
-          message.react("🕒");
-          message.reply(`Execution exceeded the time limit.`);
-        }
-      } catch (error) {
-        message.reactions.removeAll();
-        message.react("❌");
-        message.reply({
-          content: `Error fetching result: ${error.message}`,
-          ephemeral: true,
-        });
-      }
-    }, 20000);
+    getRequest(message, submission_token);
   } catch (error) {
     console.log("Error:", error.message);
     message.reply({
@@ -162,3 +111,61 @@ export default async (client, message) => {
     runCode(client, message, language, code);
   }
 };
+
+function getRequest(message, submission_token){
+  setTimeout(async () => {
+    try {
+      const result = await axios.get(
+        `http://${domain}/submissions/${submission_token}?base64_encoded=true`,
+        {
+          headers: {
+            // 'X-RapidAPI-Key': process.env.JudgeAPI,
+            // 'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+          },
+        }
+      );
+
+      console.log("Result Response:", result.data);
+      const {
+        stdout: encodedStdout,
+        stderr: encodedStderr,
+        message: resultMessage,
+        time,
+        compile_output: encodedCompileOutput,
+        status
+      } = result.data;
+
+      if (status.code === 2) {
+        return getRequest(message, submission_token);
+      }
+
+      let stdout = encodedStdout ? Buffer.from(encodedStdout, "base64").toString() : null;
+      let stderr = encodedStderr ? Buffer.from(encodedStderr, "base64").toString() : null;
+      let compile_output = encodedCompileOutput ? Buffer.from(encodedCompileOutput, "base64").toString() : null;
+
+      if (stdout) {
+        message.reply(`\nOutput:\n\`\`\`${stdout}\`\`\``);
+      } else if (stderr || resultMessage || compile_output) {
+        message.reactions.removeAll();
+        message.react("❌");
+        message.reply({
+          content: `\nError:\n\`\`\`${stderr || resultMessage || compile_output}\`\`\``,
+          ephemeral: true,
+        });
+      }
+
+      if (result.data.time_limit_exceeded) {
+        message.reactions.removeAll();
+        message.react("🕒");
+        message.reply(`Execution exceeded the time limit.`);
+      }
+    } catch (error) {
+      message.reactions.removeAll();
+      message.react("❌");
+      message.reply({
+        content: `Error fetching result: ${error.message}`,
+        ephemeral: true,
+      });
+    }
+  }, 1000);
+}
