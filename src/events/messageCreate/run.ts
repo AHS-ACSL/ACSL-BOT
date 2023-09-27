@@ -135,7 +135,7 @@ function getRequest(message, submission_token){
         status
       } = result.data;
 
-      if (status.code === 2) {
+      if (status.id === 2) {
         return getRequest(message, submission_token);
       }
 
