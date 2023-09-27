@@ -11,7 +11,7 @@ const languageIdMap = {
   ts: 74,
   lua: 64,
   c: 75,
-  "c#": 51,
+  csharp: 51,
   nasm: 45,
   bash: 46,
   lisp: 55,
@@ -61,7 +61,7 @@ async function runCode(client, message, language, code) {
   if (!options.data.language_id) {
     message.react("❌");
     return message.reply({
-      content: `Invalid language. Supported languages: js, cpp, py, java, kt, ts, lua, c, c#, nasm, bash, lisp, haskell, go, rust, sql, swift`,
+      content: `Invalid language. Supported languages: js, cpp, py, java, kt, ts, lua, c, csharp, nasm, bash, lisp, haskell, go, rust, sql, swift`,
       ephemeral: true,
     });
   }
@@ -144,14 +144,21 @@ export default async (client, message) => {
       message.react("❌");
       return message.reply({
         content:
-          'Invalid format. Code must be surrounded by triple backticks and the language specified(js, cpp, py, java, kt, ts, lua, c, c#, nasm, bash, lisp, haskell, go, rust, sql, swift). \nExample:\n!run\n\\```cpp\n#include<iostream>\n\nint main() {\n\tstd::cout << "Your code here";\n\treturn 0;\n}\n\\```',
+          'Invalid format. Code must be surrounded by triple backticks and the language specified(js, cpp, py, java, kt, ts, lua, c, csharp, nasm, bash, lisp, haskell, go, rust, sql, swift). \nExample:\n!run\n\\```cpp\n#include<iostream>\n\nint main() {\n\tstd::cout << "Your code here";\n\treturn 0;\n}\n\\```',
           ephemeral: true,
       });
     }
     const languageAndCode = codeBlock[1].split("\n");
     const language = languageAndCode[0].trim();
     const code = languageAndCode.slice(1).join("\n");
-
+    //check if code is empty
+    if (!code) {
+      message.react("❌");
+      return message.reply({
+        content: "No code provided.",
+        ephemeral: true,
+      });
+    }
     runCode(client, message, language, code);
   }
 };
