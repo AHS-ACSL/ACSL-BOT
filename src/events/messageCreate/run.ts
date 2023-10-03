@@ -1,5 +1,6 @@
 import { Client, Message } from "discord.js";
 import axios from "axios";
+import { stat } from "fs";
 
 const domain="localhost:2358"
 const languageIdMap = {
@@ -134,8 +135,8 @@ function getRequest(message, submission_token){
         compile_output: encodedCompileOutput,
         status
       } = result.data;
-
-      if (status.id === 2) {
+      //in queue and processing
+      if (status.id === 2 || status.id === 1) {
         return getRequest(message, submission_token);
       }
 
@@ -145,6 +146,7 @@ function getRequest(message, submission_token){
 
       if (stdout) {
         message.reply(`\nOutput:\n\`\`\`${stdout}\`\`\``);
+        return;
       } else if (stderr || resultMessage || compile_output) {
         message.reactions.removeAll();
         message.react("❌");
@@ -152,12 +154,42 @@ function getRequest(message, submission_token){
           content: `\nError:\n\`\`\`${stderr || resultMessage || compile_output}\`\`\``,
           ephemeral: true,
         });
+        return;
       }
 
-      if (result.data.time_limit_exceeded) {
+      if (result.data.time_limit_exceeded || status.id === 5) {
         message.reactions.removeAll();
         message.react("🕒");
         message.reply(`Execution exceeded the time limit.`);
+        return;
+      } else {
+        switch(status.id) {
+          case 3:
+            message.reply("Code executed successfully!");
+            break;
+          case 4:
+            message.reply("Wrong answer. Please check your code and try again.");
+            break;
+          case 6:
+          case 10:
+            message.reply("Compilation error. Please check your syntax and try again.");
+            break;
+          case 7:
+          case 11:
+            message.reply("Runtime error. Please check your code for issues like division by zero, array out of bounds, etc., and try again.");
+            break;
+          case 8:
+            message.reply("Internal error. Please try again later.");
+            break;
+          case 13:
+            message.reply("Presentation error. Your code's output formatting might be incorrect.");
+            break;
+          case 15:
+            message.reply("Your code uses restricted functions or system calls. Please modify your code and try again.");
+            break;
+          default:
+            message.reply("An unexpected error occurred. Please try again later.");
+        }
       }
     } catch (error) {
       message.reactions.removeAll();
