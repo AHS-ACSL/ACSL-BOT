@@ -167,5 +167,5 @@ function getRequest(message, submission_token){
         ephemeral: true,
       });
     }
-  }, 1000);
+  }, 100);
 }
