@@ -1,6 +1,4 @@
-import { Client, Message } from "discord.js";
 import axios from "axios";
-import { stat } from "fs";
 
 const domain="localhost:2358"
 const languageIdMap = {
@@ -87,6 +85,7 @@ async function runCode(client, message, language, code) {
 }
 
 export default async (client, message) => {
+  return;
   if (!message.guild || message.author.bot) return;
   if (message.content.toLowerCase().startsWith("!run")) {
     const codeBlock = message.content.split("```");
