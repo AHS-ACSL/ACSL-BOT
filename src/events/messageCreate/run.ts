@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const domain="localhost:2358"
+const domain="judge0-ce.p.rapidapi.com"
 const languageIdMap = {
   cpp: 54,
   java: 62,
@@ -26,8 +26,8 @@ interface RequestOptions {
   method: "POST";
   url: string;
   headers: {
-    // 'X-RapidAPI-Key': string,
-    // 'X-RapidAPI-Host': string,
+    'X-RapidAPI-Key': string,
+    'X-RapidAPI-Host': string,
     "Content-Type": string;
   };
   data: {
@@ -40,10 +40,10 @@ interface RequestOptions {
 
 const options: RequestOptions = {
   method: "POST",
-  url: `http://${domain}/submissions?base64_encoded=true`,
+  url: `https://${domain}/submissions?base64_encoded=true`,
   headers: {
-    // 'X-RapidAPI-Key': process.env.JudgeAPI as string,
-    // 'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+    'X-RapidAPI-Key': process.env.JudgeAPI as string,
+    'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
     "Content-Type": "application/json",
   },
   data: {
@@ -85,7 +85,6 @@ async function runCode(client, message, language, code) {
 }
 
 export default async (client, message) => {
-  return;
   if (!message.guild || message.author.bot) return;
   if (message.content.toLowerCase().startsWith("!run")) {
     const codeBlock = message.content.split("```");
@@ -116,11 +115,11 @@ function getRequest(message, submission_token){
   setTimeout(async () => {
     try {
       const result = await axios.get(
-        `http://${domain}/submissions/${submission_token}?base64_encoded=true`,
+        `https://${domain}/submissions/${submission_token}?base64_encoded=true`,
         {
           headers: {
-            // 'X-RapidAPI-Key': process.env.JudgeAPI,
-            // 'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+            'X-RapidAPI-Key': process.env.JudgeAPI,
+            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
           },
         }
       );
