@@ -24,7 +24,8 @@
     "node-cron": "^3.0.3",
     "nodemon": "^3.0.1",
     "openai": "^4.65.0",
-    "simple-spellchecker": "^1.0.2"
+    "simple-spellchecker": "^1.0.2",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/node": "^20.6.2"
