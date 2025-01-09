@@ -30,10 +30,11 @@ const client: Client = new Client({
   try {
     await mongoose.connect(process.env.MONGODB)
     console.log('Connected to DB.');
-
+    console.log(process.memoryUsage())
 
     eventHandler(client);
     await client.login(process.env.TOKEN!);
+    console.log(process.memoryUsage())
   } catch (error) {
     console.error(`Error: ${error}`);
   }
