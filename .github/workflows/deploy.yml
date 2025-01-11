@@ -6,11 +6,26 @@ on:
       - main
 
 jobs:
-  sync:
+  build-and-sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: hwalker928/ptero-gitsync@v1.0
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Transpile TypeScript
+        run: npx tsc
+      - name: Sync with Panel
+        uses: hwalker928/ptero-gitsync@v1.0
         with:
           panel-url: ${{ secrets.PANEL_URL }}
           api-key: ${{ secrets.API_KEY }}
           server-id: ${{ secrets.SERVER_ID }}
+        env:
+          GITSYNC_PATH: ./dist
