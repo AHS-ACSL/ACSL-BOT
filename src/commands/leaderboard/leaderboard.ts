@@ -1,67 +1,106 @@
-import { Client, CommandInteraction } from 'discord.js'; 
-import Level from '../../models/Level';
-import SpellError from '../../models/SpellError'; // Assuming you have a model called SpellError
+import { Client, CommandInteraction } from "discord.js";
+import Level from "../../models/Level";
+import SpellError from "../../models/SpellError";
 
 const generateLeaderboard = async (guildId: string) => {
   try {
-    const leaderboard = await Level.find({ guildId: guildId })
-      .sort({ level: -1, xp: -1 }) 
+    return await Level.find({ guildId })
+      .sort({ level: -1, xp: -1 })
       .limit(10)
       .exec();
-
-    return leaderboard;
   } catch (error) {
-    console.log(`Error generating level leaderboard: ${error}`);
+    console.error(`Error generating level leaderboard: ${error}`);
+    return [];
   }
 };
 
 const generateSpellErrorLeaderboard = async (guildId: string) => {
   try {
-    const errorLeaderboard = await SpellError.find({ guildId: guildId })
-      .sort({ spellerrors: -1 }) // Sorting by most errors
+    return await SpellError.find({ guildId })
+      .sort({ spellerrors: -1 })
       .limit(10)
       .exec();
-
-    return errorLeaderboard;
   } catch (error) {
-    console.log(`Error generating spell error leaderboard: ${error}`);
+    console.error(`Error generating spell error leaderboard: ${error}`);
+    return [];
   }
 };
 
 export default {
-  name: 'leaderboard',
-  description: 'Show the current level and spell error leaderboards',
+  name: "leaderboard",
+  description: "Show the current level and spell error leaderboards",
   async callback(client: Client, interaction: CommandInteraction) {
     try {
-      const guildId = interaction.guild.id;
-      const leaderboard = await generateLeaderboard(guildId);
-      const errorLeaderboard = await generateSpellErrorLeaderboard(guildId);
+      await interaction.deferReply();
 
-      let leaderboardMessage = '**ACSL Level Leaderboard:**\n';
-
-      for (let i = 0; i < leaderboard.length; i++) {
-        const member = await interaction.guild.members.fetch(leaderboard[i].userId);
-        if (member) {
-          leaderboardMessage += `${i + 1}. ${member.displayName} - Level ${leaderboard[i].level}\n`;
-        } else {
-          leaderboardMessage += `${i + 1}. Unknown User (ID: ${leaderboard[i].userId}) - Level ${leaderboard[i].level}\n`;
-        }
+      const { guild } = interaction;
+      if (!guild) {
+        await interaction.editReply(
+          "This command can only be used inside a guild."
+        );
+        return;
       }
 
-      leaderboardMessage += '\n**ACSL Spell Error Leaderboard:**\n';
+      const guildId = guild.id;
+      const [leaderboard, errorLeaderboard] = await Promise.all([
+        generateLeaderboard(guildId),
+        generateSpellErrorLeaderboard(guildId),
+      ]);
 
-      for (let i = 0; i < errorLeaderboard.length; i++) {
-        const member = await interaction.guild.members.fetch(errorLeaderboard[i].userId);
-        if (member) {
-          leaderboardMessage += `${i + 1}. ${member.displayName} - ${errorLeaderboard[i].spellerrors} errors\n`;
-        } else {
-          leaderboardMessage += `${i + 1}. Unknown User (ID: ${errorLeaderboard[i].userId}) - ${errorLeaderboard[i].spellerrors} errors\n`;
-        }
-      }
+      let leaderboardMessage = "**ACSL Level Leaderboard:**\n";
 
-      await interaction.reply(leaderboardMessage);
+      const levelLines = await Promise.all(
+        leaderboard.map(async (record, i) => {
+          const { userId, level } = record;
+          let memberDisplay = `Unknown User (ID: ${userId})`;
+
+          try {
+            const member = await guild.members.fetch(userId);
+            if (member) {
+              memberDisplay = member.displayName;
+            }
+          } catch (err: any) {
+            //Probably DiscordAPIError 10007: unknown member
+          }
+
+          return `${i + 1}. ${memberDisplay} - Level ${level}`;
+        })
+      );
+
+      leaderboardMessage += levelLines.join("\n");
+
+      leaderboardMessage += "\n\n**ACSL Spell Error Leaderboard:**\n";
+
+      const errorLines = await Promise.all(
+        errorLeaderboard.map(async (record, i) => {
+          const { userId, spellerrors } = record;
+          let memberDisplay = `Unknown User (ID: ${userId})`;
+
+          try {
+            const member = await guild.members.fetch(userId);
+            if (member) {
+              memberDisplay = member.displayName;
+            }
+          } catch (err: any) {
+            //sigma error handling
+          }
+
+          return `${i + 1}. ${memberDisplay} - ${spellerrors} errors`;
+        })
+      );
+
+      leaderboardMessage += errorLines.join("\n");
+
+      await interaction.editReply(leaderboardMessage);
     } catch (error) {
-      console.log(`Error executing leaderboard command: ${error}`);
+      console.error(`Error executing leaderboard command: ${error}`);
+      try {
+        await interaction.editReply(
+          "An error occurred while generating the leaderboard."
+        );
+      } catch {
+        //sigma error handling
+      }
     }
   },
 };

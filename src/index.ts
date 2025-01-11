@@ -15,10 +15,13 @@ const client: Client = new Client({
     IntentsBitField.Flags.MessageContent,
     IntentsBitField.Flags.DirectMessages,
     IntentsBitField.Flags.DirectMessageTyping,
+    IntentsBitField.Flags.GuildMessageReactions
   ],
   partials: [
     Partials.Channel,
     Partials.Message,
+    Partials.Reaction,
+    Partials.User
   ],
 });
 
