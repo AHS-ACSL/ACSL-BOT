@@ -1,4 +1,3 @@
-// onFireUpdate.ts
 import { Client, Message, TextChannel } from "discord.js";
 import cron from "node-cron";
 import axios from "axios";
@@ -47,7 +46,7 @@ async function fetchFireData(): Promise<string> {
 
     let message =
       "ACSL bot has been set up to report live fire containment. " +
-      "Updates are queried from https://www.fire.ca.gov/ every 3 hours.\n\n";
+      "Updates are queried from https://www.fire.ca.gov/ every 5 minutes.\n\n";
 
     for (const incident of results) {
       message += `${incident.placeName} ------- ${incident.containment} Containment ------- ${incident.acres} acres\n`;
@@ -61,10 +60,10 @@ async function fetchFireData(): Promise<string> {
 }
 
 /**
- * Sets up a cron job to update the channel with latest fire data every 3 hours.
+ * Sets up a cron job to update the channel with the latest fire data every 5 minutes.
  */
 export default function onFireUpdate(client: Client) {
-  cron.schedule("0 */3 * * *", async () => {
+  cron.schedule("*/5 * * * *", async () => {
     try {
       const data = await fetchFireData();
       if (!data) return;
@@ -104,5 +103,5 @@ export default function onFireUpdate(client: Client) {
     }
   });
 
-  console.log("Scheduled job for fire updates is set to run every 3 hours.");
+  console.log("Scheduled job for fire updates is set to run every 5 minutes.");
 }
