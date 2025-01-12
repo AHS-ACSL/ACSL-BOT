@@ -148,7 +148,7 @@ async function restartServer() {
     console.log(`Starting deployment process...`);
 
     await deleteServerFiles("dist", ["runtime"]);
-    await deleteServerFiles("dist", [".env", ".apollo", ".trash", "dist"])
+    await deleteServerFiles("/", [".env", ".apollo", ".trash", "dist"])
 
     console.log(`Uploading files from ${LOCAL_DIR} to ${REMOTE_DIR}...`);
     await uploadDirectory(LOCAL_DIR, REMOTE_DIR, IGNORE_LIST);
