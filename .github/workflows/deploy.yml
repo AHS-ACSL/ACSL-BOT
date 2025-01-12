@@ -29,4 +29,4 @@ jobs:
           PANEL_URL: ${{ secrets.PANEL_URL }}
           SERVER_ID: ${{ secrets.SERVER_ID }}
         run: |
-          node dist/scripts/sync.js
+          node scripts/sync.js
