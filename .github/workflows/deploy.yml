@@ -16,16 +16,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - name: Install Dependencies
-        run: npm install
 
-      - name: Transpile TypeScript
-        run: npx tsc
-      - name: Sync with Panel
-        uses: hwalker928/ptero-gitsync@v1.0
-        with:
-          panel-url: ${{ secrets.PANEL_URL }}
-          api-key: ${{ secrets.API_KEY }}
-          server-id: ${{ secrets.SERVER_ID }}
+      - name: Run Deployment Script
         env:
-          GITSYNC_PATH: ./dist
+          API_KEY: ${{ secrets.API_KEY }}
+          PANEL_URL: ${{ secrets.PANEL_URL }}
+          SERVER_ID: ${{ secrets.SERVER_ID }}
+        run: |
+          node scripts/sync.js
