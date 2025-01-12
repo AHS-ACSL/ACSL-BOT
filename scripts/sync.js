@@ -31,7 +31,7 @@ function httpsRequest(options, data = null) {
   });
 }
 
-async function deleteServerFiles(remoteDir, exclude = [".env", "dist/runtime", ".apollo", ".trash"]) {
+async function deleteServerFiles(remoteDir, exclude) {
   try {
     const headers = {
       Authorization: `Bearer ${API_KEY}`,
@@ -51,8 +51,8 @@ async function deleteServerFiles(remoteDir, exclude = [".env", "dist/runtime", "
     const allItems = listResponse.data.map((item) => `${remoteDir}/${item.attributes.name}`);
 
     const itemsToDelete = allItems.filter((item) => {
-      const relativePath = path.relative(REMOTE_DIR, item); // Get the relative path
-      return !exclude.some((ignore) => relativePath.startsWith(ignore));
+      const itemName = path.basename(item);
+      return !exclude.includes(itemName);
     });
 
     if (itemsToDelete.length === 0) {
@@ -77,7 +77,6 @@ async function deleteServerFiles(remoteDir, exclude = [".env", "dist/runtime", "
     console.error("Error deleting files:", error.message);
   }
 }
-
 
 async function uploadFile(localFilePath, remotePath) {
   const fileContent = fs.readFileSync(localFilePath, "utf8");
@@ -107,11 +106,10 @@ async function uploadDirectory(localDir, remoteDir, ignoreList = []) {
   for (const item of items) {
     const localPath = path.join(localDir, item);
     const remotePath = `${remoteDir}/${item}`;
-    const relativePath = path.relative(LOCAL_DIR, localPath);
+    const itemName = path.basename(localPath);
 
-    // Check if the relative path matches any ignore rule
-    if (ignoreList.some((ignore) => relativePath.startsWith(ignore))) {
-      console.log(`Skipping ignored item: ${relativePath}`);
+    if (ignoreList.includes(itemName)) {
+      console.log(`Skipping ignored item: ${localPath}`);
       continue;
     }
 
@@ -124,7 +122,6 @@ async function uploadDirectory(localDir, remoteDir, ignoreList = []) {
     }
   }
 }
-
 
 async function restartServer() {
   console.log("Restarting the server...");
@@ -150,7 +147,8 @@ async function restartServer() {
   try {
     console.log(`Starting deployment process...`);
 
-    await deleteServerFiles(REMOTE_DIR);
+    await deleteServerFiles("dist", ["runtime"]);
+    await deleteServerFiles("dist", [".env", ".apollo", ".trash", "dist"])
 
     console.log(`Uploading files from ${LOCAL_DIR} to ${REMOTE_DIR}...`);
     await uploadDirectory(LOCAL_DIR, REMOTE_DIR, IGNORE_LIST);
