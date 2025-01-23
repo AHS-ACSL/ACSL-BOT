@@ -63,6 +63,7 @@ async function fetchFireData(): Promise<string> {
  * Sets up a cron job to update the channel with the latest fire data every 5 minutes.
  */
 export default function onFireUpdate(client: Client) {
+  return;
   cron.schedule("*/5 * * * *", async () => {
     try {
       const data = await fetchFireData();
